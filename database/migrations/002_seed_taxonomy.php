@@ -27,14 +27,14 @@ return function($pdo) {
     // 3. Update car make_id
     $pdo->exec("
         UPDATE cars c
-        JOIN makes m ON c.make COLLATE utf8mb4_general_ci = m.name COLLATE utf8mb4_general_ci
+        JOIN makes m ON c.make = m.name
         SET c.make_id = m.id
     ");
 
     // 4. Update car body_type_id
     $pdo->exec("
         UPDATE cars c
-        JOIN body_types bt ON c.body_type COLLATE utf8mb4_general_ci = bt.name COLLATE utf8mb4_general_ci
+        JOIN body_types bt ON c.body_type = bt.name
         SET c.body_type_id = bt.id
     ");
     echo "DONE\n";
