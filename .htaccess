@@ -1,17 +1,17 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /car-website/
-
-    # Force HTTPS (optional, commented out for local dev)
-    # RewriteCond %{HTTPS} !=on
-    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # If your site is in a subdirectory, set it here. 
+    # For cPanel root, leave it as /
+    # For local development in /car-website/, use /car-website/
+    # RewriteBase /car-website/
 
     # Stop rewriting for existing files and directories
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
 
     # Route everything else to index.php
-    RewriteRule . index.php [L]
+    RewriteRule ^ index.php [L,QSA]
 </IfModule>
 
 # Security: Disable directory listing

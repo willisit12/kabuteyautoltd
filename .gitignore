@@ -5,3 +5,4 @@ uploads/
 *.bak
 .htaccess_new
 index.php_new
+config/*.sql

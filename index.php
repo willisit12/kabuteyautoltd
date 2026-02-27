@@ -7,51 +7,42 @@
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/Router.php';
+require_once __DIR__ . '/includes/SecurityMiddleware.php';
+require_once __DIR__ . '/includes/AuthMiddleware.php';
 
-// Simple Router
-$request = $_SERVER['REQUEST_URI'];
-$basePath = BASE_PATH;
-$path = parse_url($request, PHP_URL_PATH);
-if ($basePath !== '' && strpos($path, $basePath) === 0) {
-    $path = substr($path, strlen($basePath));
-}
-$path = trim($path, '/');
+$router = new Router(BASE_PATH);
 
-// Optional: strip .php extension if present in URI
-if (str_ends_with($path, '.php')) {
-    $path = substr($path, 0, -4);
-}
+// Global Middleware
+$router->addGlobalMiddleware(SecurityMiddleware::class);
 
-// Default home or admin base
-if ($path === '' || $path === 'index') {
-    $page = 'home';
-} elseif ($path === 'admin') {
-    $page = 'admin/dashboard';
-} elseif (strpos($path, 'car-detail/') === 0) {
-    $page = 'car-detail';
-    $slug = substr($path, 11);
-    $_GET['slug'] = $slug; // Set it in $_GET for the page to pick up
-} else {
-    $page = $path;
-}
+// Public Routes
+$router->get('/', __DIR__ . '/pages/home.php');
+$router->get('/home', __DIR__ . '/pages/home.php');
+$router->get('/cars', __DIR__ . '/pages/cars.php');
+$router->get('/car-detail/{slug}', __DIR__ . '/pages/car-detail.php');
+$router->get('/contact', __DIR__ . '/pages/contact.php');
+$router->post('/contact', __DIR__ . '/pages/contact.php');
+$router->get('/login', __DIR__ . '/pages/login.php');
+$router->post('/login', __DIR__ . '/pages/login.php');
+$router->get('/logout', function() {
+    logout();
+});
 
-// Security: limit allowed characters in page names (allow slashes for API)
-if (!preg_match('/^[a-zA-Z0-0\-_ \/.]+$/', $page)) {
-    $page = '404';
-}
+// Admin Routes (Protected)
+$router->get('/admin', __DIR__ . '/admin/dashboard.php')->middleware(AuthMiddleware::class);
+$router->get('/admin/dashboard', __DIR__ . '/admin/dashboard.php')->middleware(AuthMiddleware::class);
+$router->get('/admin/cars', __DIR__ . '/admin/cars/index.php')->middleware(AuthMiddleware::class);
+$router->get('/admin/cars/add', __DIR__ . '/admin/cars/add.php')->middleware(AuthMiddleware::class);
+$router->post('/admin/cars/add', __DIR__ . '/admin/cars/add.php')->middleware(AuthMiddleware::class);
+$router->get('/admin/cars/edit/{id}', __DIR__ . '/admin/cars/edit.php')->middleware(AuthMiddleware::class);
+$router->post('/admin/cars/edit/{id}', __DIR__ . '/admin/cars/edit.php')->middleware(AuthMiddleware::class);
+$router->get('/admin/users', __DIR__ . '/admin/users/index.php')->middleware(AuthMiddleware::class);
 
-// Load the page
-if (strpos($page, 'admin/') === 0) {
-    $pageFile = __DIR__ . "/{$page}.php";
-} elseif (strpos($page, 'api/') === 0) {
-    $pageFile = __DIR__ . "/pages/{$page}.php";
-} else {
-    $pageFile = __DIR__ . "/pages/{$page}.php";
-}
+// API Routes
+$router->get('/api/language', __DIR__ . '/pages/api/language.php');
+$router->post('/api/convert-currency', __DIR__ . '/pages/api/convert-currency.php');
 
-if (!file_exists($pageFile)) {
-    $pageFile = __DIR__ . "/pages/404.php";
-}
-
-require_once $pageFile;
+// Dispatch
+$router->dispatch();
 ?>
