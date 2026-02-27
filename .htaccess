@@ -1,9 +1,9 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     
-    # If your site is in a subdirectory, set it here. 
-    # For cPanel root, leave it as /
-    # For local development in /car-website/, use /car-website/
+    # If your site is in a subdirectory (like local XAMPP), set it here:
+    # Local: RewriteBase /car-website/
+    # cPanel (main domain): RewriteBase /
     RewriteBase /car-website/
 
     # Stop rewriting for existing files and directories

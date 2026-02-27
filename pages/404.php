@@ -138,30 +138,32 @@ try {
                     $slug = $car['slug'] ?? '';
                 ?>
                 <a href="<?php echo url('car-detail/' . $slug); ?>" 
-                   class="group bg-white dark:bg-slate-800/80 rounded-[1.5rem] overflow-hidden border border-gray-200 dark:border-slate-600/50 hover:border-accent/40 transition-all duration-500 hover:-translate-y-2 shadow-sm hover:shadow-xl">
+                   class="group bg-white dark:bg-slate-800/40 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-white/10 hover:border-accent/50 dark:hover:border-accent/50 transition-all duration-500 hover:-translate-y-2 shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
                     <!-- Image -->
-                    <div class="relative h-40 overflow-hidden">
+                    <div class="relative h-44 overflow-hidden">
                         <img src="<?php echo $image; ?>" 
                              alt="<?php echo clean(($car['make'] ?? '') . ' ' . ($car['model'] ?? '')); ?>"
                              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80"></div>
                         <!-- Year badge -->
-                        <div class="absolute top-3 left-3">
-                            <span class="px-2.5 py-1 rounded-lg bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider border border-white/10">
+                        <div class="absolute top-4 left-4">
+                            <span class="px-3 py-1.5 rounded-xl bg-accent text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-accent/20">
                                 <?php echo $car['year'] ?? ''; ?>
                             </span>
                         </div>
                     </div>
                     <!-- Info -->
-                    <div class="p-4">
-                        <h3 class="font-black text-foreground text-sm tracking-tight group-hover:text-accent transition-colors mb-1 truncate uppercase">
+                    <div class="p-6">
+                        <h3 class="font-black text-foreground dark:text-white text-base tracking-tight group-hover:text-accent transition-colors mb-2 truncate uppercase">
                             <?php echo clean(($car['make'] ?? '') . ' ' . ($car['model'] ?? '')); ?>
                         </h3>
                         <div class="flex items-center justify-between">
-                            <span class="text-accent font-black text-base tracking-tighter">
-                                <?php echo isset($car['price']) ? formatPrice($car['price']) : ''; ?>
-                            </span>
-                            <span class="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
+                            <div class="flex flex-col">
+                                <span class="text-accent font-black text-lg tracking-tighter leading-none">
+                                    <?php echo isset($car['price']) ? formatPrice($car['price']) : ''; ?>
+                                </span>
+                            </div>
+                            <span class="px-3 py-1.5 rounded-lg bg-muted dark:bg-white/5 text-muted-foreground dark:text-gray-400 text-[9px] font-black uppercase tracking-widest border border-border dark:border-white/5">
                                 <?php echo isset($car['mileage']) ? formatMileage($car['mileage']) : ''; ?>
                             </span>
                         </div>
