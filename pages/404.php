@@ -37,7 +37,7 @@ try {
 
     <div class="relative z-10 max-w-5xl mx-auto px-4 w-full">
         <!-- Hero Error Block -->
-        <div class="text-center mb-16 reveal-section">
+        <div class="text-center mb-16 global-reveal">
             <!-- Animated 404 -->
             <div class="relative inline-block mb-8">
                 <span class="text-[12rem] md:text-[16rem] font-black text-transparent leading-none tracking-tighter select-none" 
@@ -117,7 +117,7 @@ try {
 
         <?php if (!empty($featuredCars)): ?>
         <!-- Featured Vehicles Section -->
-        <div class="reveal-section border-t border-border/20 pt-16">
+        <div class="global-reveal border-t border-border/20 pt-16">
             <div class="flex items-end justify-between mb-10">
                 <div>
                     <span class="inline-block text-accent font-black tracking-[0.2em] uppercase text-[10px] mb-3">
@@ -182,18 +182,5 @@ try {
     </div>
 </section>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof gsap !== 'undefined') {
-        gsap.from(".reveal-section", {
-            y: 40,
-            opacity: 0,
-            duration: 1.2,
-            ease: "expo.out",
-            stagger: 0.2
-        });
-    }
-});
-</script>
 
 <?php include_once __DIR__ . '/../includes/layout/footer.php'; ?>

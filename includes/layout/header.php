@@ -559,7 +559,7 @@
 
                 // Reveal animations if Motion is present
                 if (typeof Motion !== 'undefined') {
-                    Motion.animate(".reveal-section", { opacity: [0, 1], y: [20, 0] }, { 
+                    Motion.animate(".global-reveal", { opacity: [0, 1], y: [20, 0] }, { 
                         delay: Motion.stagger(0.1),
                         duration: 0.8,
                         easing: [0.16, 1, 0.3, 1]
