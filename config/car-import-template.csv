@@ -1,0 +1,4 @@
+make,model,year,price,mileage,vin,color,fuel_type,transmission,body_type,condition,description,features,image_folder
+Honda,Civic,2021,24500,15000,1HGBH41JXMN109186,Silver,GASOLINE,AUTOMATIC,SEDAN,EXCELLENT,"Clean title, one owner","Backup Camera,Bluetooth,Apple CarPlay",2021-honda-civic
+Toyota,Camry,2022,28900,8200,4T1BF1FK5CU508637,White,HYBRID,CVT,SEDAN,VERY_GOOD,"Fuel efficient hybrid sedan","Lane Departure Warning,Adaptive Cruise Control,Sunroof",2022-toyota-camry
+Ford,F-150,2020,35000,32000,1FTEW1EP5LFA12345,Black,GASOLINE,AUTOMATIC,TRUCK,GOOD,"Reliable work truck with towing package","Towing Package,Bed Liner,4WD",2020-ford-f150

@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force HTTPS
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Route requests to index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+DirectoryIndex index.php
+RewriteCond %{HTTP_HOST} ^kabuteyautolimited\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.kabuteyautolimited\.com$
+RewriteRule ^/?$ "https\:\/\/kabuteyautolimited\.com\/index\.php" [R=301,L]
+

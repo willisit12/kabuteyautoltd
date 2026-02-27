@@ -1,0 +1,21 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /car-website/
+
+    # Force HTTPS (optional, commented out for local dev)
+    # RewriteCond %{HTTPS} !=on
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Stop rewriting for existing files and directories
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Route everything else to index.php
+    RewriteRule . index.php [L]
+</IfModule>
+
+# Security: Disable directory listing
+Options -Indexes
+
+# Default page
+DirectoryIndex index.php
