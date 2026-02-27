@@ -128,7 +128,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
         <div class="swiper featured-carousel px-0">
             <div class="swiper-wrapper">
                 <?php foreach ($featuredCars as $car):
-                    $image =  url($car['primary_image']) ?? 'https://via.placeholder.com/800x600?text=No+Image';
+                    $image =  url($car['primary_image']) ?? 'https://placehold.co/800x600?text=No+Image';
                 ?>
                 <div class="swiper-slide !w-[90vw] md:!w-[60vw]">
                     <div class="relative h-[450px] md:h-[600px] rounded-[2rem] md:rounded-[3rem] overflow-hidden group">

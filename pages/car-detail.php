@@ -221,7 +221,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <?php foreach ($recommendedCars as $recCar): 
-                    $image = $recCar['primary_image'] ?? 'https://via.placeholder.com/400x300?text=No+Image';
+                    $image = $recCar['primary_image'] ?? 'https://placehold.co/400x300?text=No+Image';
                 ?>
                 <div class="bg-card backdrop-blur-md rounded-[2rem] overflow-hidden border border-border hover:border-accent/50 transition-all duration-700 group hover:-translate-y-2 shadow-sm hover:shadow-xl">
                     <div class="relative h-48 md:h-56 overflow-hidden">

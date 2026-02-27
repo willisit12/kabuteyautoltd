@@ -6,7 +6,7 @@
 function renderCarCard($car, $extraClasses = '') {
     if (!$car) return;
 
-    $image = !empty($car['primary_image']) ? url($car['primary_image']) : 'https://via.placeholder.com/400x300?text=No+Image';
+    $image = !empty($car['primary_image']) ? url($car['primary_image']) : 'https://placehold.co/400x300?text=No+Image';
     $name = clean($car['make'] . ' ' . $car['model'] . ' ' . $car['year'] . ' ' . ($car['trim'] ?? ''));
     $price = formatPrice($car['price']);
     $mileage = formatMileage($car['mileage']);
@@ -27,13 +27,13 @@ function renderCarCard($car, $extraClasses = '') {
     }
 
     ?>
-    <div class="car-card bg-white dark:bg-card rounded-[1.5rem] overflow-hidden group transition-all duration-500 hover:shadow-2xl border border-border/10 <?php echo $extraClasses; ?>">
+    <div class="car-card bg-white dark:bg-card rounded-[1.25rem] md:rounded-[1.5rem] overflow-hidden group transition-all duration-500 hover:shadow-2xl border border-border/10 <?php echo $extraClasses; ?>">
         <!-- Image Container -->
         <div class="relative aspect-[4/3] overflow-hidden">
             <img src="<?php echo $image; ?>" alt="<?php echo $name; ?>" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
             
             <!-- Buy Now Badge -->
-            <div class="absolute top-3 left-3 bg-[#00c58d] text-white text-[10px] font-black px-3 py-1 rounded-md shadow-sm">
+            <div class="absolute top-0 left-0 bg-[#00c58d] text-white text-[8px] md:text-[11px] font-black px-2.5 py-1.5 md:px-4 md:py-2 rounded-br-[1rem] md:rounded-br-[1.25rem] shadow-sm uppercase tracking-tight z-10">
                 Buy Now
             </div>
             
@@ -41,14 +41,14 @@ function renderCarCard($car, $extraClasses = '') {
         </div>
 
         <!-- Content Area -->
-        <div class="p-4 md:p-5">
+        <div class="p-3.5 md:p-5">
             <!-- Grade & Name -->
-            <div class="flex items-start gap-2 mb-2">
-                <div class="<?php echo $gradeColor; ?> <?php echo $gradeText; ?> text-[8px] font-black px-2 py-0.5 rounded-sm flex items-center gap-1 shrink-0 mt-1">
-                    <span class="opacity-70">Grade</span>
-                    <span class="text-[10px]"><?php echo $grade; ?></span>
+            <div class="flex items-start gap-1.5 mb-2">
+                <div class="<?php echo $gradeColor; ?> <?php echo $gradeText; ?> text-[9px] font-black px-1.5 py-0.5 rounded-[4px] flex items-center gap-1 shrink-0 mt-0.5">
+                    <span class="opacity-70 text-[7px] uppercase">Grade</span>
+                    <span><?php echo $grade; ?></span>
                 </div>
-                <h3 class="text-sm md:text-base font-bold text-foreground leading-tight line-clamp-2 hover:text-accent transition-colors">
+                <h3 class="text-[13px] md:text-base font-bold text-foreground leading-tight line-clamp-2 hover:text-accent transition-colors">
                     <a href="<?php echo url('car-detail/' . $car['slug']); ?>">
                         Used <?php echo $name; ?>
                     </a>
@@ -56,22 +56,22 @@ function renderCarCard($car, $extraClasses = '') {
             </div>
 
             <!-- Metadata Line -->
-            <p class="text-[11px] font-medium text-muted-foreground mb-3">
+            <p class="text-[10px] md:text-[11px] font-medium text-muted-foreground/60 mb-3">
                 <?php echo $year; ?>.<?php echo date('m', strtotime($car['created_at'])); ?> | <?php echo $mileage; ?> | <?php echo $fuel; ?>
             </p>
 
             <!-- Tags Section -->
-            <div class="flex flex-wrap gap-2 mb-4">
-                <div class="border border-[#f5a623]/30 bg-[#f5a623]/5 text-[#f5a623] text-[10px] font-bold px-2 py-0.5 rounded-sm">
+            <div class="flex flex-col gap-1.5 mb-4">
+                <div class="inline-flex self-start border border-[#f5a623]/30 bg-[#f5a623]/5 text-[#f5a623] text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-sm">
                     Direct Sourcing
                 </div>
-                <div class="text-[#00c58d] text-[10px] font-bold flex items-center gap-1">
-                    <i class="fas fa-check-circle"></i>
+                <div class="text-[#00c58d] text-[9px] md:text-[10px] font-bold flex items-center gap-1.5">
+                    <i class="fas fa-check-circle text-[10px]"></i>
                     Guazi Inspected
                 </div>
                 <?php if ($car['featured']): ?>
-                    <div class="text-accent text-[10px] font-bold flex items-center gap-1">
-                        <i class="fas fa-star"></i>
+                    <div class="text-accent text-[9px] md:text-[10px] font-bold flex items-center gap-1.5">
+                        <i class="fas fa-star text-[10px]"></i>
                         Nearly New
                     </div>
                 <?php endif; ?>
@@ -79,11 +79,14 @@ function renderCarCard($car, $extraClasses = '') {
 
             <!-- Price Row -->
             <div class="flex items-center justify-between pt-3 border-t border-border/10">
-                <div class="flex items-baseline gap-1">
-                    <span class="text-[10px] text-muted-foreground font-bold">FOB Price:</span>
-                    <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo $price; ?></span>
+                <div class="flex items-center gap-3">
+                    <div class="flex flex-col -space-y-1">
+                        <span class="text-[8px] md:text-[9px] text-muted-foreground font-black uppercase tracking-tighter">FOB</span>
+                        <span class="text-[8px] md:text-[9px] text-muted-foreground font-black uppercase tracking-tighter">Price:</span>
+                    </div>
+                    <span class="text-base md:text-xl font-black text-foreground tracking-tighter"><?php echo $price; ?></span>
                 </div>
-                <a href="<?php echo url('car-detail/' . $car['slug']); ?>" class="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-foreground hover:bg-accent hover:text-white transition-all">
+                <a href="<?php echo url('car-detail/' . $car['slug']); ?>" class="w-7 h-7 md:w-9 md:h-9 rounded-full bg-slate-100 dark:bg-muted flex items-center justify-center text-foreground hover:bg-accent hover:text-white transition-all">
                     <i class="fas fa-chevron-right text-[10px]"></i>
                 </a>
             </div>

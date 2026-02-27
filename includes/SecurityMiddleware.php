@@ -30,7 +30,7 @@ class SecurityMiddleware implements MiddlewareInterface
                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com; " . 
                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " .
                "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; " .
-               "img-src 'self' data: https://images.unsplash.com https://via.placeholder.com; " .
+               "img-src 'self' data: https://images.unsplash.com https://placehold.co; " .
                "connect-src 'self';");
 
         // Only if HTTPS is detected

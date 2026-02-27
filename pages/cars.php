@@ -125,7 +125,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
         <?php if (count($cars) > 0): ?>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="inventory-grid">
             <?php foreach ($cars as $car): ?>
-                <?php renderCarCard($car, 'opacity-0 translate-y-10'); ?>
+                <?php renderCarCard($car, 'opacity-0 translate-y-2'); ?>
             <?php endforeach; ?>
         </div>
         
