@@ -13,7 +13,7 @@ if (count($featuredCars) > 0 && count($featuredCars) < 6) {
 }
 
 // Initial cars for the grid
-$initialLimit = 6;
+$initialLimit = 8;
 $latestCars = searchCars([], $initialLimit);
 $makes = getCarMakes();
 
@@ -279,8 +279,20 @@ include_once __DIR__ . '/../includes/layout/header.php';
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Fallback: If GSAP fails, show key elements
+        const fallback = setTimeout(() => {
+            const items = document.querySelectorAll('.car-card, .reveal-section, .car-metric-card');
+            items.forEach(c => {
+                c.style.opacity = '1';
+                c.style.transform = 'translateY(0)';
+            });
+        }, 1500);
+
         // --- GSAP Entrances ---
-        const tl = gsap.timeline({ defaults: { ease: "power4.out" }});
+        const tl = gsap.timeline({ 
+            defaults: { ease: "power4.out" },
+            onComplete: () => clearTimeout(fallback)
+        });
         
         // Hero Animation
         tl.to("#hero-bg", { scale: 1, duration: 2.5 })
@@ -313,6 +325,19 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 duration: 1,
                 delay: i * 0.2
             });
+        });
+
+        // Inventory Grid Animation
+        gsap.to("#car-grid .car-card", {
+            scrollTrigger: {
+                trigger: "#car-grid",
+                start: "top 85%",
+            },
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
         });
 
         // Carousel Initialization
