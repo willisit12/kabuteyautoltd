@@ -128,11 +128,11 @@ include_once __DIR__ . '/../includes/layout/header.php';
         <div class="swiper featured-carousel px-0">
             <div class="swiper-wrapper">
                 <?php foreach ($featuredCars as $car):
-                    $image = $car['primary_image'] ?? 'https://via.placeholder.com/800x600?text=No+Image';
+                    $image =  url($car['primary_image']) ?? 'https://via.placeholder.com/800x600?text=No+Image';
                 ?>
                 <div class="swiper-slide !w-[90vw] md:!w-[60vw]">
                     <div class="relative h-[450px] md:h-[600px] rounded-[2rem] md:rounded-[3rem] overflow-hidden group">
-                        <img src="<?php echo url($image); ?>" alt="<?php echo clean($car['make'] . ' ' . $car['model']); ?>" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+                        <img src="<?php echo $image; ?>" alt="<?php echo clean($car['make'] . ' ' . $car['model']); ?>" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent"></div>
                         <div class="absolute bottom-8 left-8 right-8 md:bottom-12 md:left-12 md:right-12 text-white">
                             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
