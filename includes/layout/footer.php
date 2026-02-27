@@ -5,9 +5,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
                 <div class="col-span-1 md:col-span-1">
-                    <a href="<?php echo url(); ?>" class="inline-block mb-8">
-                        <img src="<?php echo url('images/logo-main.png'); ?>" alt="<?php echo SITE_NAME; ?>" class="h-12 object-contain dark:brightness-110 brightness-90">
-                    </a>
+                    <div class="mb-8">
+                        <?php renderLogo('h-12'); ?>
+                    </div>
                     <p class="text-muted-foreground leading-relaxed font-medium max-w-xs transition-colors">
                         <?php echo SITE_TAGLINE; ?>. <br>Toronto's heritage for automotive excellence since 2012.
                     </p>
@@ -43,17 +43,7 @@
                
                 <div>
                     <h4 class="text-foreground font-bold uppercase tracking-widest text-xs mb-8">Social Landscape</h4>
-                    <div class="flex space-x-4">
-                        <a href="#" class="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center border border-border hover:border-accent/50 hover:bg-accent/10 hover:text-accent transition-all duration-500 group text-foreground shadow-sm">
-                            <i class="fab fa-instagram text-xl transition-transform group-hover:scale-110"></i>
-                        </a>
-                        <a href="#" class="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center border border-border hover:border-accent/50 hover:bg-accent/10 hover:text-accent transition-all duration-500 group text-foreground shadow-sm">
-                            <i class="fab fa-facebook-f text-xl transition-transform group-hover:scale-110"></i>
-                        </a>
-                        <a href="#" class="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center border border-border hover:border-accent/50 hover:bg-accent/10 hover:text-accent transition-all duration-500 group text-foreground shadow-sm">
-                            <i class="fab fa-youtube text-xl transition-transform group-hover:scale-110"></i>
-                        </a>
-                    </div>
+                    <?php renderSocialLinks('space-x-4'); ?>
                 </div>
             </div>
             

@@ -27,6 +27,13 @@
     <script defer src="https://unpkg.com/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
     <script defer src="<?php echo url('assets/js/alpine.min.js'); ?>"></script>
 
+    <?php 
+    // Load reusable components
+    require_once __DIR__ . '/../component/logo.php';
+    require_once __DIR__ . '/../component/theme-toggle.php';
+    require_once __DIR__ . '/../component/social-links.php';
+    ?>
+
     <script>
         // Professional Theme Detection - Immediate Head Execution to prevent FOLM
         (function() {
@@ -246,7 +253,8 @@
 </head>
 <body 
     x-data="{ 
-        darkMode: $persist(document.documentElement.classList.contains('dark')).as('admin-theme') 
+        darkMode: $persist(document.documentElement.classList.contains('dark')).as('admin-theme'),
+        mobileMenu: false
     }" 
     x-init="$watch('darkMode', val => {
         if (val) document.documentElement.classList.add('dark');
@@ -270,11 +278,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20 md:h-24 transition-all duration-300">
                 <div class="flex items-center">
-                    <a href="<?php echo url(); ?>" class="group">
-                        <div class="flex items-center">
-                            <img src="<?php echo url('images/logo-main.png'); ?>" alt="<?php echo SITE_NAME; ?>" class="h-8 md:h-12 object-contain transition-transform duration-500 group-hover:scale-105 dark:brightness-110 brightness-90">
-                        </div>
-                    </a>
+                    <?php renderLogo('h-8 md:h-12'); ?>
                 </div>
                
                 <div class="hidden md:flex items-center space-x-10">
@@ -334,102 +338,140 @@
                     <?php else: ?>
                         <a href="<?php echo url('login'); ?>" class="text-foreground hover:text-accent transition-all duration-300 flex items-center gap-2">
                             <div class="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-accent">
-                                <i class="fas fa-user-circle"></i>
+                                <i class="fas fa-user-circle text-lg"></i>
                             </div>
                         </a>
                     <?php endif; ?>
 
-                    <!-- Theme Toggle -->
-                    <button @click="darkMode = !darkMode" class="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-accent hover:text-accent transition-all shadow-sm">
-                        <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
-                    </button>
+                    <!-- Theme Toggle Component -->
+                    <?php renderThemeToggle(); ?>
                 </div>
 
-                <!-- Mobile Trigger & Theme -->
+                <!-- Mobile Trigger -->
                 <div class="md:hidden flex items-center gap-4 relative z-[101]">
-                    <button @click="darkMode = !darkMode" class="text-foreground p-2 hover:text-accent transition-colors">
-                        <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
-                    </button>
-                    <button class="text-foreground p-2 hover:text-accent transition-colors" onclick="toggleMobileMenu()">
-                        <i class="fas fa-bars text-2xl"></i>
+                    <button class="text-foreground p-2 hover:text-accent transition-colors" @click="toggleMobileMenu(); mobileMenu = !mobileMenu">
+                        <i class="fas fa-bars-staggered text-2xl"></i>
                     </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="fixed inset-0 bg-background/98 backdrop-blur-2xl z-[300] flex flex-col p-8 pt-24 translate-x-full">
-        <button class="absolute top-8 right-8 text-foreground text-3xl" onclick="toggleMobileMenu()">&times;</button>
-        <div class="flex flex-col space-y-8 text-center" id="mobile-links">
-            <a href="<?php echo url(); ?>" class="text-3xl font-bold text-foreground hover:text-accent opacity-0"><?php echo __('nav_home'); ?></a>
-            <a href="<?php echo url('cars'); ?>" class="text-3xl font-bold text-foreground hover:text-accent opacity-0"><?php echo __('nav_inventory'); ?></a>
-            <a href="<?php echo url('about'); ?>" class="text-3xl font-bold text-foreground hover:text-accent opacity-0"><?php echo __('nav_about'); ?></a>
-            <a href="<?php echo url('contact'); ?>" class="text-3xl font-bold text-foreground hover:text-accent opacity-0"><?php echo __('nav_contact'); ?></a>
+    <!-- Mobile Sidebar Backdrop -->
+    <div x-show="mobileMenu" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="toggleMobileMenu(); mobileMenu = false"
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
+         x-cloak></div>
+
+    <!-- Premium Mobile Sidebar -->
+    <aside id="mobile-menu" 
+           class="fixed top-0 left-[-20rem] h-full w-80 bg-[#0f172a] text-white flex flex-col z-[300] transition-transform duration-500 ease-in-out border-r border-white/5 shadow-2xl overflow-hidden"
+           x-cloak>
+        
+        <div class="p-8 pb-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-accent rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-car text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-black tracking-tighter uppercase text-lg leading-none"><?php echo SITE_NAME; ?></h1>
+                    <p class="text-[8px] font-black uppercase tracking-[0.3em] text-accent mt-1">Toronto Elite</p>
+                </div>
+            </div>
+            <button @click="toggleMobileMenu(); mobileMenu = false" class="text-white/40 hover:text-white transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 px-6 py-8 space-y-2 overflow-y-auto custom-scrollbar">
+            <p class="text-[10px] font-black uppercase tracking-widest text-white/30 mb-4 ml-2">Navigation</p>
             
-            <div class="h-[1px] bg-border w-full opacity-0"></div>
+            <a href="<?php echo url(); ?>" class="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all hover:bg-white/5 group">
+                <i class="fas fa-home w-5 text-accent group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm tracking-tight"><?php echo __('nav_home'); ?></span>
+            </a>
+            <a href="<?php echo url('cars'); ?>" class="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all hover:bg-white/5 group">
+                <i class="fas fa-car w-5 text-accent group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm tracking-tight"><?php echo __('nav_inventory'); ?></span>
+            </a>
+            <a href="<?php echo url('about'); ?>" class="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all hover:bg-white/5 group">
+                <i class="fas fa-info-circle w-5 text-accent group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm tracking-tight"><?php echo __('nav_about'); ?></span>
+            </a>
+            <a href="<?php echo url('contact'); ?>" class="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all hover:bg-white/5 group">
+                <i class="fas fa-envelope w-5 text-accent group-hover:scale-110 transition-transform"></i>
+                <span class="font-bold text-sm tracking-tight"><?php echo __('nav_contact'); ?></span>
+            </a>
+
+            <p class="text-[10px] font-black uppercase tracking-widest text-white/30 mb-4 ml-2 pt-6">Preferences</p>
             
             <!-- Mobile Localization & Currency -->
-            <div class="flex flex-col gap-4 opacity-0 w-full px-4">
+            <div class="space-y-3 px-2">
+                <!-- Theme Mode -->
+                <?php renderThemeToggle(true); ?>
+
                 <!-- Language Dropdown -->
                 <div x-data="{ open: false }" class="w-full">
-                    <button @click="open = !open" class="flex items-center justify-between w-full p-4 rounded-2xl border border-border/50 bg-muted/20 text-foreground font-bold transition-all hover:border-accent/30">
+                    <button @click="open = !open" class="flex items-center justify-between w-full p-4 rounded-2xl border border-white/5 bg-white/5 text-white font-bold transition-all hover:border-accent/30">
                         <div class="flex items-center gap-3">
                             <i class="fas fa-globe text-accent text-sm"></i>
                             <span class="uppercase text-sm"><?php echo I18n::getLocale(); ?></span>
                         </div>
-                        <i class="fas fa-chevron-down text-[10px] transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
+                        <i class="fas fa-chevron-down text-[10px] opacity-40 transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
                     </button>
-                    <div x-show="open" x-cloak class="mt-2 flex flex-col gap-1 p-2 bg-muted/10 rounded-2xl border border-border/30 overflow-hidden" 
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 -translate-y-2"
-                         x-transition:enter-end="opacity-100 translate-y-0">
-                        <a href="?lang=en" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'en' ? 'bg-accent text-white shadow-lg' : 'hover:bg-muted text-foreground/60'; ?>">
+                    <div x-show="open" x-cloak class="mt-2 flex flex-col gap-1 p-2 bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
+                        <a href="?lang=en" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'en' ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
                             <span class="text-xs font-black uppercase tracking-widest">English</span>
-                            <?php if (I18n::getLocale() === 'en'): ?><i class="fas fa-check text-[10px]"></i><?php endif; ?>
                         </a>
-                        <a href="?lang=es" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'es' ? 'bg-accent text-white shadow-lg' : 'hover:bg-muted text-foreground/60'; ?>">
+                        <a href="?lang=es" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'es' ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
                             <span class="text-xs font-black uppercase tracking-widest">Español</span>
-                            <?php if (I18n::getLocale() === 'es'): ?><i class="fas fa-check text-[10px]"></i><?php endif; ?>
                         </a>
-                        <a href="?lang=zh" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'zh' ? 'bg-accent text-white shadow-lg' : 'hover:bg-muted text-foreground/60'; ?>">
+                        <a href="?lang=zh" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'zh' ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
                             <span class="text-xs font-black uppercase tracking-widest">中文 (Chinese)</span>
-                            <?php if (I18n::getLocale() === 'zh'): ?><i class="fas fa-check text-[10px]"></i><?php endif; ?>
                         </a>
                     </div>
                 </div>
 
                 <!-- Currency Dropdown -->
                 <div x-data="{ open: false }" class="w-full">
-                    <button @click="open = !open" class="flex items-center justify-between w-full p-4 rounded-2xl border border-border/50 bg-muted/20 text-foreground font-bold transition-all hover:border-accent/30">
+                    <button @click="open = !open" class="flex items-center justify-between w-full p-4 rounded-2xl border border-white/5 bg-white/5 text-white font-bold transition-all hover:border-accent/30">
                         <div class="flex items-center gap-3">
                             <i class="fas fa-coins text-accent text-sm"></i>
                             <span class="uppercase text-sm"><?php echo I18n::getCurrency(); ?></span>
                         </div>
-                        <i class="fas fa-chevron-down text-[10px] transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
+                        <i class="fas fa-chevron-down text-[10px] opacity-40 transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
                     </button>
-                    <div x-show="open" x-cloak class="mt-2 grid grid-cols-2 gap-2 p-2 bg-muted/10 rounded-2xl border border-border/30 overflow-hidden"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 -translate-y-2"
-                         x-transition:enter-end="opacity-100 translate-y-0">
+                    <div x-show="open" x-cloak class="mt-2 grid grid-cols-2 gap-2 p-2 bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
                         <?php foreach (['USD', 'EUR', 'GBP', 'AED', 'CNY', 'GHS'] as $curr): ?>
-                            <a href="?currency=<?php echo $curr; ?>" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getCurrency() === $curr ? 'bg-accent text-white shadow-lg' : 'hover:bg-muted text-foreground/60'; ?>">
+                            <a href="?currency=<?php echo $curr; ?>" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getCurrency() === $curr ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
                                 <span class="text-xs font-black"><?php echo $curr; ?></span>
-                                <?php if (I18n::getCurrency() === $curr): ?><i class="fas fa-check text-[10px]"></i><?php endif; ?>
                             </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
             </div>
+        </nav>
 
-            <div class="h-[1px] bg-border w-full opacity-0"></div>
+        <div class="p-8 border-t border-white/5 flex flex-col gap-6">
+            <?php renderSocialLinks('justify-center gap-6'); ?>
+            
             <?php if (isLoggedIn()): ?>
-                <a href="<?php echo url('admin/dashboard'); ?>" class="text-accent font-black text-2xl opacity-0"><?php echo __('nav_dashboard'); ?></a>
+                <a href="<?php echo url('admin/dashboard'); ?>" class="flex items-center justify-center gap-3 bg-white/5 hover:bg-accent text-white p-5 rounded-[2rem] font-black uppercase tracking-tighter transition-all shadow-xl group">
+                    <i class="fas fa-grid-2 text-accent group-hover:text-white"></i> Dashboard access
+                </a>
             <?php else: ?>
-                <a href="<?php echo url('login'); ?>" class="text-foreground font-bold text-2xl opacity-0">Login</a>
+                <a href="<?php echo url('login'); ?>" class="flex items-center justify-center gap-3 bg-accent text-white p-5 rounded-[2rem] font-black uppercase tracking-tighter transition-all shadow-2xl hover:scale-[1.02] active:scale-[0.98]">
+                    <i class="fas fa-user-circle"></i> Member Entrance
+                </a>
             <?php endif; ?>
         </div>
-    </div>
+    </aside>
 
     <script>
         const { animate, stagger } = Motion;
@@ -448,18 +490,19 @@
 
         window.toggleMobileMenu = async function() {
             const menu = document.getElementById('mobile-menu');
-            const links = document.querySelectorAll('#mobile-links > *');
+            const links = document.querySelectorAll('#mobile-menu nav > *');
             
             if (!isMenuOpen) {
                 isMenuOpen = true;
                 if (lenis) lenis.stop();
                 
-                await animate(menu, { x: 0 }, { 
+                // Show menu from left
+                await animate(menu, { x: "100%" }, { 
                     duration: 0.8, 
                     easing: [0.16, 1, 0.3, 1] 
                 }).finished;
 
-                animate(links, { opacity: 1, y: [20, 0] }, { 
+                animate(links, { opacity: [0, 1], y: [20, 0] }, { 
                     delay: stagger(0.05),
                     duration: 0.5
                 });
@@ -471,7 +514,8 @@
                     duration: 0.3 
                 });
 
-                await animate(menu, { x: "100%" }, { 
+                // Hide menu back to left
+                await animate(menu, { x: 0 }, { 
                     duration: 0.5,
                     easing: "ease-in"
                 }).finished;

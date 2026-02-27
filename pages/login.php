@@ -56,108 +56,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $error = getFlash('error');
 $success = getFlash('success');
+
+$pageTitle = 'Secure Vault Access';
+include_once __DIR__ . '/../includes/layout/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en" class="h-full">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Vault Access - <?php echo SITE_NAME; ?></title>
-    
-    <!-- Theme Token Initialization -->
-    <style>
-        :root {
-            --background: #ffffff;
-            --foreground: #020617;
-            --accent: #f97316;
-            --muted-foreground: #64748b;
-            --border: #e2e8f0;
-            --card: #ffffff;
-        }
-        .dark {
-            --background: #020617;
-            --foreground: #f8fafc;
-            --accent: #f97316;
-            --muted-foreground: #94a3b8;
-            --border: #1e293b;
-            --card: #0f172a;
-        }
-    </style>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        background: 'var(--background)',
-                        foreground: 'var(--foreground)',
-                        accent: 'var(--accent)',
-                        muted: { foreground: 'var(--muted-foreground)' },
-                        border: 'var(--border)',
-                        card: 'var(--card)'
-                    },
-                    animation: {
-                        shimmer: 'shimmer 2s linear infinite',
-                    },
-                    keyframes: {
-                        shimmer: {
-                            '0%': { transform: 'translateX(-100%)' },
-                            '100%': { transform: 'translateX(100%)' }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    
-    <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--background);
-            color: var(--foreground);
-        }
-        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        .dark .glass {
-            background: rgba(15, 23, 42, 0.6);
-        }
-        .text-gradient {
-            background: linear-gradient(to right, #f97316, #fb923c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-    </style>
-    
-    <script>
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
-</head>
-<body class="h-full flex items-center justify-center p-6 overflow-hidden">
+
+<div class="relative min-h-[80vh] flex items-center justify-center p-6 pt-32 pb-20 overflow-hidden bg-background transition-colors duration-500">
     <!-- Background Accents -->
-    <div class="fixed inset-0 z-0 opacity-20 dark:opacity-30 pointer-events-none">
+    <div class="absolute inset-0 z-0 opacity-20 dark:opacity-30 pointer-events-none">
         <div class="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] bg-accent/10 rounded-full blur-[160px]"></div>
         <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-accent/5 rounded-full blur-[140px]"></div>
     </div>
 
     <div class="w-full max-w-lg relative z-10">
-        <!-- Logo/Header -->
-        <div class="text-center mb-10">
+        <!-- Logo/Header Area inside content -->
+        <div class="text-center mb-10 reveal-content">
             <div class="inline-flex items-center justify-center w-20 h-20 bg-accent/10 rounded-3xl mb-6 shadow-[0_20px_50px_rgba(249,115,22,0.2)]">
                 <i class="fas fa-shield-alt text-4xl text-accent"></i>
             </div>
-            <h1 class="text-4xl font-black tracking-tighter uppercase leading-none mb-2">
+            <h1 class="text-4xl md:text-5xl font-black tracking-tighter uppercase leading-none mb-2">
                 Secure <span class="text-gradient">Vault.</span>
             </h1>
             <p class="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground opacity-60">
@@ -166,7 +83,7 @@ $success = getFlash('success');
         </div>
 
         <!-- Login Card -->
-        <div class="glass border border-border/50 p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
+        <div class="glass border border-border/50 p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden reveal-content" style="animation-delay: 0.1s">
             <div class="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-accent/30 to-transparent"></div>
             
             <?php if ($error): ?>
@@ -191,7 +108,6 @@ $success = getFlash('success');
                 <div class="space-y-3">
                     <div class="flex justify-between items-center ml-1">
                         <label class="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Encryption Key (Password)</label>
-                        <a href="#" class="text-[8px] font-black uppercase tracking-widest text-accent hover:underline">Revoke Access?</a>
                     </div>
                     <div class="relative group">
                         <i class="fas fa-key absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/30 group-focus-within:text-accent transition-colors"></i>
@@ -207,16 +123,12 @@ $success = getFlash('success');
             </form>
         </div>
 
-        <div class="text-center mt-12">
+        <div class="text-center mt-12 reveal-content" style="animation-delay: 0.2s">
             <a href="<?php echo url(); ?>" class="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>Exit to Public Site
             </a>
         </div>
     </div>
+</div>
 
-    <!-- Background Decoration -->
-    <div class="fixed bottom-10 right-10 text-[80px] font-black text-foreground/5 uppercase tracking-tighter select-none pointer-events-none">
-        Elite
-    </div>
-</body>
-</html>
+<?php include_once __DIR__ . '/../includes/layout/footer.php'; ?>
