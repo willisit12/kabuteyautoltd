@@ -123,63 +123,9 @@ include_once __DIR__ . '/../includes/layout/header.php';
         </div>
 
         <?php if (count($cars) > 0): ?>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12" id="inventory-grid">
-            <?php foreach ($cars as $car):
-                $image = $car['primary_image'] ?? 'https://via.placeholder.com/400x300?text=No+Image';
-            ?>
-            <div class="car-card bg-card backdrop-blur-md rounded-[2.5rem] overflow-hidden border border-border hover:border-accent/50 transition-all duration-700 group opacity-0 translate-y-2 [will-change:transform,opacity] [backface-visibility:hidden]">
-                <div class="relative h-64 md:h-72 overflow-hidden">
-                    <img src="<?php echo url($image); ?>" alt="<?php echo clean($car['make'] . ' ' . $car['model']); ?>" class="w-full h-full object-cover transition duration-1000 group-hover:scale-110 group-hover:rotate-1">
-                    <div class="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-80"></div>
-                    <?php if ($car['featured']): ?>
-                        <div class="absolute top-6 right-6 bg-accent text-white text-[9px] md:text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Featured Element</div>
-                    <?php endif; ?>
-                </div>
-                <div class="px-6 py-8 md:px-8 md:py-10">
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="w-6 h-[1px] bg-accent/60"></span>
-                                <span class="text-accent text-[9px] font-black uppercase tracking-widest"><?php echo clean($car['year']); ?> Collection</span>
-                            </div>
-                            <h3 class="text-xl md:text-2xl font-black text-foreground group-hover:text-accent transition-colors tracking-tighter leading-tight mb-1 truncate">
-                                <?php echo clean($car['make'] . ' ' . $car['model']); ?>
-                            </h3>
-                            <p class="text-muted-foreground/50 text-[9px] font-bold uppercase tracking-[0.2em] italic"><?php echo __('authenticity_guaranteed'); ?></p>
-                        </div>
-                        <div class="text-right shrink-0 ml-4 pt-1">
-                            <span class="text-xl md:text-2xl font-black text-foreground tracking-tighter whitespace-nowrap"><?php echo formatPrice($car['price']); ?></span>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-8 py-5 border-y border-border/10">
-                        <div class="flex items-center gap-2.5 text-muted-foreground text-[10px] font-bold uppercase tracking-wide">
-                            <div class="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-accent/80 text-[10px]">
-                                <i class="fas fa-tachometer-alt"></i>
-                            </div>
-                            <?php echo formatMileage($car['mileage']); ?>
-                        </div>
-                        <div class="flex items-center gap-2.5 text-muted-foreground text-[10px] font-bold uppercase tracking-wide">
-                            <div class="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-accent/80 text-[10px]">
-                                <i class="fas fa-gas-pump"></i>
-                            </div>
-                            <?php echo $car['fuel_type']; ?>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-3">
-                        <a href="<?php echo url('car-detail/' . $car['slug']); ?>" 
-                           class="flex-1 bg-muted/40 hover:bg-accent text-foreground hover:text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] text-center transition-all border border-border/50 hover:border-accent">
-                            <?php echo __('view_details'); ?>
-                        </a>
-                        <a href="<?php echo url('car-detail/' . $car['slug']); ?>" 
-                           class="w-11 h-11 flex items-center justify-center bg-muted/40 hover:bg-accent text-foreground hover:text-white rounded-xl transition-all border border-border/50 hover:border-accent group/btn"
-                           title="<?php echo __('view_details'); ?>">
-                            <i class="fas fa-external-link-alt text-xs group-hover/btn:scale-110 transition-transform"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="inventory-grid">
+            <?php foreach ($cars as $car): ?>
+                <?php renderCarCard($car, 'opacity-0 translate-y-10'); ?>
             <?php endforeach; ?>
         </div>
         

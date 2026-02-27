@@ -32,6 +32,7 @@
     require_once __DIR__ . '/../component/logo.php';
     require_once __DIR__ . '/../component/theme-toggle.php';
     require_once __DIR__ . '/../component/social-links.php';
+    require_once __DIR__ . '/../component/car-card.php';
     ?>
 
     <script>
