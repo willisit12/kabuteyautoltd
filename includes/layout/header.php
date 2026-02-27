@@ -360,10 +360,10 @@
 
     <!-- Mobile Sidebar Backdrop -->
     <div x-show="mobileMenu" 
-         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter="transition ease-out duration-150"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave="transition ease-in duration-100"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          @click="toggleMobileMenu(); mobileMenu = false"
@@ -372,7 +372,7 @@
 
     <!-- Premium Mobile Sidebar -->
     <aside id="mobile-menu" 
-           class="fixed top-0 left-[-20rem] h-full w-80 bg-[#0f172a] text-white flex flex-col z-[300] transition-transform duration-500 ease-in-out border-r border-white/5 shadow-2xl overflow-hidden"
+           class="fixed top-0 left-[-20rem] h-full w-80 bg-[#0f172a] text-white flex flex-col z-[300] transition-transform duration-300 ease-in-out border-r border-white/5 shadow-2xl overflow-hidden"
            x-cloak>
         
         <div class="p-8 pb-4 flex justify-between items-center">
@@ -499,13 +499,13 @@
                 
                 // Show menu from left
                 await animate(menu, { x: "100%" }, { 
-                    duration: 0.8, 
+                    duration: 0.4, 
                     easing: [0.16, 1, 0.3, 1] 
                 }).finished;
 
                 animate(links, { opacity: [0, 1], y: [20, 0] }, { 
-                    delay: stagger(0.05),
-                    duration: 0.5
+                    delay: stagger(0.04),
+                    duration: 0.3
                 });
 
             } else {
@@ -517,7 +517,7 @@
 
                 // Hide menu back to left
                 await animate(menu, { x: 0 }, { 
-                    duration: 0.5,
+                    duration: 0.3,
                     easing: "ease-in"
                 }).finished;
                 
