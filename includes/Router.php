@@ -106,7 +106,8 @@ class Router
      */
     private function compilePattern(string $path): string
     {
-        return '#^' . preg_replace('#\{([a-zA-Z0-0\-_]+)\}#', '(?P<$1>[^/]+)', $path) . '$#';
+        // Fix regex to properly support alphanumeric, hyphens, and underscores
+        return '#^' . preg_replace('#\{([a-zA-Z0-9\-_]+)\}#', '(?P<$1>[^/]+)', $path) . '$#';
     }
 
     /**

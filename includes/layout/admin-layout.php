@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../auth.php';
 requireAuth();
+require_once __DIR__ . '/../component/preloader.php';
 
 $user = getUserInfo();
 
@@ -140,6 +141,7 @@ function renderAdminLayout($content, $pageTitle = 'Dashboard') {
             document.documentElement.classList.remove('dark');
         }
     </script>
+    <?php renderPreloaderCSS(); ?>
 </head>
 <body class="h-full bg-background transition-colors duration-500 overflow-hidden" 
       x-data="{ 
@@ -151,6 +153,9 @@ function renderAdminLayout($content, $pageTitle = 'Dashboard') {
           if (val) document.documentElement.classList.add('dark');
           else document.documentElement.classList.remove('dark');
       })">
+
+    <!-- Global Preloader -->
+    <?php renderPreloaderHTML(); ?>
     
     <div class="flex h-full">
         <!-- Sidebar Backdrop (Mobile Only) -->
@@ -319,6 +324,7 @@ function renderAdminLayout($content, $pageTitle = 'Dashboard') {
             });
         });
     </script>
+    <?php renderPreloaderJS(); ?>
 </body>
 </html>
 <?php

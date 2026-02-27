@@ -109,6 +109,72 @@ include_once __DIR__ . '/../includes/layout/header.php';
     </div>
 </section>
 
+<!-- Taxonomy Selection: Shop by Make & Type -->
+<section class="py-16 bg-white dark:bg-gray-950 transition-colors duration-500 border-b border-border/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Shop by Make -->
+        <div class="mb-16 reveal-section">
+            <div class="flex justify-between items-end border-b border-gray-200 dark:border-gray-800 pb-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-2">Shop by Make</h2>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">You can search for cars by make.</p>
+                </div>
+                <a href="<?php echo url('brand-selection'); ?>" class="text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-1 transition-colors">
+                    View all makes <i class="fas fa-chevron-right text-xs"></i>
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-4 md:gap-6">
+                <?php 
+                $popularMakesStmt = $db->query("SELECT id, name, logo_url FROM makes WHERE is_popular = 1 ORDER BY name LIMIT 12");
+                $popularMakes = $popularMakesStmt->fetchAll();
+                foreach ($popularMakes as $make): 
+                ?>
+                <a href="<?php echo url('cars/' . strtolower(str_replace(' ', '-', $make['name']))); ?>" class="flex flex-col items-center gap-3 group">
+                    <div class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 dark:bg-white dark:border-gray-200 group-hover:shadow-md group-hover:border-emerald-200 transition-all p-3">
+                        <?php if ($make['logo_url']): ?>
+                            <img src="<?php echo $make['logo_url']; ?>" alt="<?php echo clean($make['name']); ?>" class="w-full h-full object-contain group-hover:scale-110 transition-transform">
+                        <?php else: ?>
+                            <span class="font-bold text-gray-400 text-xs"><?php echo substr($make['name'], 0, 3); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-emerald-600 transition-colors text-center"><?php echo clean($make['name']); ?></span>
+                </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <!-- Shop by Type -->
+        <div class="reveal-section">
+            <div class="border-b border-gray-200 dark:border-gray-800 pb-4 mb-8">
+                <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-2">Shop by Type</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Here, you can find vehicles of any type</p>
+            </div>
+            
+            <div class="grid grid-cols-4 md:grid-cols-8 gap-4 md:gap-6">
+                <?php 
+                $typesStmt = $db->query("SELECT id, name, icon_url FROM body_types ORDER BY name LIMIT 8");
+                $types = $typesStmt->fetchAll();
+                foreach ($types as $type): 
+                ?>
+                <a href="<?php echo url('cars/type/' . strtolower(str_replace(' ', '-', $type['name']))); ?>" class="flex flex-col items-center gap-4 group">
+                    <div class="h-16 md:h-20 w-full flex items-center justify-center group-hover:-translate-y-2 transition-transform duration-300">
+                        <?php if ($type['icon_url']): ?>
+                            <img src="<?php echo $type['icon_url']; ?>" alt="<?php echo clean($type['name']); ?>" class="h-full object-contain filter drop-shadow-sm">
+                        <?php else: ?>
+                            <i class="fas fa-car-side text-4xl text-gray-300"></i>
+                        <?php endif; ?>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-emerald-600 transition-colors text-center"><?php echo clean($type['name']); ?></span>
+                </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+    </div>
+</section>
+
 <!-- Featured Showcase -->
 <?php if (count($featuredCars) > 0): ?>
 <section class="py-10 bg-muted transition-colors duration-500 overflow-hidden">

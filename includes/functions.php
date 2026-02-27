@@ -118,38 +118,88 @@ function getFlash($key) {
 // Get car makes for filters
 function getCarMakes() {
     $db = getDB();
-    $stmt = $db->query("SELECT DISTINCT make FROM cars ORDER BY make");
-    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $stmt = $db->query("SELECT id, name, logo_url FROM makes ORDER BY name");
+    return $stmt->fetchAll();
+}
+
+// Get body types for filters
+function getBodyTypes() {
+    $db = getDB();
+    $stmt = $db->query("SELECT id, name, icon_url FROM body_types ORDER BY name");
+    return $stmt->fetchAll();
 }
 
 // Search and filter cars
-function searchCars($filters = [], $limit = 12, $offset = 0) {
+function searchCars($filters = [], $limit = 12, $offset = 0, $countOnly = false) {
     $db = getDB();
-    $sql = "SELECT c.*,
-            (SELECT url FROM car_images WHERE car_id = c.id ORDER BY `order` ASC LIMIT 1) as primary_image,
-            (SELECT COUNT(*) FROM car_images WHERE car_id = c.id) as image_count
-            FROM cars c
-            WHERE c.status = 'AVAILABLE'";
+    
+    if ($countOnly) {
+        $sql = "SELECT COUNT(*) FROM cars c WHERE c.status = 'AVAILABLE'";
+    } else {
+        $sql = "SELECT c.*,
+                m.name as make_name,
+                bt.name as body_type_name,
+                (SELECT url FROM car_images WHERE car_id = c.id ORDER BY `order` ASC LIMIT 1) as primary_image,
+                (SELECT COUNT(*) FROM car_images WHERE car_id = c.id) as image_count
+                FROM cars c
+                LEFT JOIN makes m ON c.make_id = m.id
+                LEFT JOIN body_types bt ON c.body_type_id = bt.id
+                WHERE c.status = 'AVAILABLE'";
+    }
     
     $params = [];
-    if (!empty($filters['make'])) { $sql .= " AND c.make = ?"; $params[] = $filters['make']; }
-    if (!empty($filters['model'])) { $sql .= " AND c.model LIKE ?"; $params[] = '%' . $filters['model'] . '%'; }
-    if (!empty($filters['year'])) { $sql .= " AND c.year = ?"; $params[] = $filters['year']; }
-    if (!empty($filters['min_price'])) { $sql .= " AND c.price >= ?"; $params[] = $filters['min_price']; }
-    if (!empty($filters['max_price'])) { $sql .= " AND c.price <= ?"; $params[] = $filters['max_price']; }
     
-    // Global search term (model, trim, vin)
+    // Normal Filters
+    if (!empty($filters['make_id'])) { $sql .= " AND c.make_id = ?"; $params[] = $filters['make_id']; }
+    if (!empty($filters['body_type_id'])) { $sql .= " AND c.body_type_id = ?"; $params[] = $filters['body_type_id']; }
+    if (!empty($filters['year_from'])) { $sql .= " AND c.year >= ?"; $params[] = $filters['year_from']; }
+    if (!empty($filters['year_to'])) { $sql .= " AND c.year <= ?"; $params[] = $filters['year_to']; }
+    if (!empty($filters['price_min'])) { $sql .= " AND c.price >= ?"; $params[] = $filters['price_min']; }
+    if (!empty($filters['price_max'])) { $sql .= " AND c.price <= ?"; $params[] = $filters['price_max']; }
+    if (!empty($filters['mileage_min'])) { $sql .= " AND c.mileage >= ?"; $params[] = $filters['mileage_min']; }
+    if (!empty($filters['mileage_max'])) { $sql .= " AND c.mileage <= ?"; $params[] = $filters['mileage_max']; }
+    
+    if (!empty($filters['transmission'])) { $sql .= " AND c.transmission = ?"; $params[] = $filters['transmission']; }
+    if (!empty($filters['fuel_type'])) { $sql .= " AND c.fuel_type = ?"; $params[] = $filters['fuel_type']; }
+    if (!empty($filters['seats'])) { $sql .= " AND c.seats = ?"; $params[] = $filters['seats']; }
+    if (!empty($filters['drive_train'])) { $sql .= " AND c.drive_train = ?"; $params[] = $filters['drive_train']; }
+    
+    // Legacy support for make (string) if needed
+    if (!empty($filters['make']) && empty($filters['make_id'])) { $sql .= " AND c.make = ?"; $params[] = $filters['make']; }
+
+    // Global search term (model, make)
     if (!empty($filters['search'])) {
-        $sql .= " AND (c.model LIKE ? OR c.trim LIKE ? OR c.vin LIKE ?)";
+        $sql .= " AND (c.model LIKE ? OR c.make LIKE ?)";
         $searchTerm = '%' . $filters['search'] . '%';
-        $params[] = $searchTerm;
         $params[] = $searchTerm;
         $params[] = $searchTerm;
     }
     
-    $sql .= " ORDER BY c.featured DESC, c.created_at DESC LIMIT ? OFFSET ?";
-    $params[] = $limit;
-    $params[] = $offset;
+    if ($countOnly) {
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchColumn();
+    }
+
+    // Sorting Logic
+    $orderBy = "c.featured DESC, c.created_at DESC"; // Default
+    if (!empty($filters['sort'])) {
+        switch ($filters['sort']) {
+            case 'price_asc':
+                $orderBy = "c.price ASC";
+                break;
+            case 'price_desc':
+                $orderBy = "c.price DESC";
+                break;
+            case 'newest':
+                $orderBy = "c.created_at DESC";
+                break;
+        }
+    }
+
+    $sql .= " ORDER BY {$orderBy} LIMIT ? OFFSET ?";
+    $params[] = (int)$limit;
+    $params[] = (int)$offset;
     
     $stmt = $db->prepare($sql);
     $stmt->execute($params);

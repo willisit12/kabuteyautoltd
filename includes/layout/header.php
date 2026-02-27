@@ -23,9 +23,10 @@
     <script src="<?php echo url('assets/js/ScrollTrigger.min.js'); ?>"></script>
     <script src="<?php echo url('assets/js/swiper-bundle.min.js'); ?>"></script>
     <script src="<?php echo url('assets/js/lenis.min.js'); ?>"></script>
-    <script src="<?php echo url('assets/js/motion.js'); ?>"></script>
+    <script src="<?php echo url('assets/js/motion.js?v=' . time()); ?>"></script>
     <script defer src="https://unpkg.com/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="<?php echo url('assets/js/alpine.min.js'); ?>"></script>
+    <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="<?php echo url('assets/js/alpine.min.js?v=' . time()); ?>"></script>
 
     <?php 
     // Load reusable components
@@ -33,6 +34,7 @@
     require_once __DIR__ . '/../component/theme-toggle.php';
     require_once __DIR__ . '/../component/social-links.php';
     require_once __DIR__ . '/../component/car-card.php';
+    require_once __DIR__ . '/../component/preloader.php';
     ?>
 
     <script>
@@ -45,6 +47,7 @@
             } else {
                 document.documentElement.classList.remove('dark');
             }
+            window.BASE_URL = '<?php echo SITE_URL; ?>';
         })();
     </script>
 
@@ -251,6 +254,7 @@
             overflow: hidden !important;
         }
     </style>
+    <?php renderPreloaderCSS(); ?>
 </head>
 <body 
     x-data="{ 
@@ -265,12 +269,7 @@
     class="bg-background text-foreground selection:bg-accent selection:text-white transition-colors duration-500 loading"
 >
     <!-- Cinematic Preloader -->
-    <div id="preloader">
-        <div class="loader-content">
-            <div class="loader-ring"></div>
-            <div class="loader-logo">Elite</div>
-        </div>
-    </div>
+    <?php renderPreloaderHTML(url('images/car.png')); ?>
 
     <div id="scroll-progress"></div>
 
@@ -552,6 +551,7 @@
             const preloader = document.getElementById('preloader');
             if (preloader) {
                 document.body.classList.remove('loading');
+                document.body.classList.remove('preloader-active');
                 preloader.classList.add('loaded');
                 
                 // Re-enable Lenis if present
@@ -567,5 +567,10 @@
                 }
             }
         });
+        // Fallback: force hide after 3s
+        setTimeout(() => { 
+            const p = document.getElementById('preloader');
+            if (p) { p.classList.add('loaded'); document.body.classList.remove('loading','preloader-active'); }
+        }, 3000);
     </script>
 </body>

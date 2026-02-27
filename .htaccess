@@ -4,7 +4,7 @@
     # If your site is in a subdirectory, set it here. 
     # For cPanel root, leave it as /
     # For local development in /car-website/, use /car-website/
-    # RewriteBase /car-website/
+    RewriteBase /car-website/
 
     # Stop rewriting for existing files and directories
     RewriteCond %{REQUEST_FILENAME} !-f
