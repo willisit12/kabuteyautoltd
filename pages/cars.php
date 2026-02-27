@@ -239,14 +239,14 @@ document.addEventListener('alpine:init', () => {
 
             <?php if ($categoryMode): ?>
                 <!-- Category Hero Banner -->
-                <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 mb-8 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center gap-6">
-                    <div class="w-20 h-20 md:w-24 md:h-24 bg-white dark:bg-white rounded-2xl flex items-center justify-center p-3 shrink-0 border border-gray-100 dark:border-gray-200 shadow-sm">
+                <div class="bg-white dark:bg-gray-900 rounded-3xl p-6 md:p-8 mb-8 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row items-center gap-6">
+                    <div class="w-20 h-20 md:w-24 md:h-24 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center p-3 shrink-0 border border-gray-100 dark:border-gray-700 shadow-sm">
                         <?php if ($categoryMode === 'make' && $categoryData['logo_url']): ?>
-                            <img src="<?php echo $categoryData['logo_url']; ?>" alt="<?php echo clean($categoryData['name']); ?>" class="w-full h-full object-contain mix-blend-multiply">
+                            <img src="<?php echo $categoryData['logo_url']; ?>" alt="<?php echo clean($categoryData['name']); ?>" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-screen dark:invert">
                         <?php elseif ($categoryMode === 'type' && $categoryData['icon_url']): ?>
-                            <img src="<?php echo $categoryData['icon_url']; ?>" alt="<?php echo clean($categoryData['name']); ?>" class="w-full h-full object-contain mix-blend-multiply">
+                            <img src="<?php echo $categoryData['icon_url']; ?>" alt="<?php echo clean($categoryData['name']); ?>" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-screen dark:invert">
                         <?php else: ?>
-                            <span class="text-3xl font-black text-gray-400"><?php echo substr($categoryData['name'], 0, 1); ?></span>
+                            <span class="text-3xl font-black text-gray-400 dark:text-gray-500 uppercase"><?php echo substr($categoryData['name'], 0, 1); ?></span>
                         <?php endif; ?>
                     </div>
                     <div>

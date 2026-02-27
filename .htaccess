@@ -1,10 +1,8 @@
 <IfModule mod_rewrite.c>
+    # This configuration is environment-agnostic. 
+    # It works in subdirectories (like /car-website/) and at the root (/)
+    # without needing to change RewriteBase.
     RewriteEngine On
-    
-    # If your site is in a subdirectory (like local XAMPP), set it here:
-    # Local: RewriteBase /car-website/
-    # cPanel (main domain): RewriteBase /
-    RewriteBase /car-website/
 
     # Stop rewriting for existing files and directories
     RewriteCond %{REQUEST_FILENAME} !-f

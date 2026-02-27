@@ -240,7 +240,7 @@ function renderFilterContent($prefix = 'desktop') {
                 <button @click="openMake = !openMake" @click.away="openMake = false" type="button" class="w-full h-12 px-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent outline-none transition-all flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <template x-if="selectedMakeLogo">
-                            <img :src="selectedMakeLogo" class="w-6 h-6 object-contain mix-blend-multiply dark:filter dark:brightness-0 dark:invert" alt="">
+                            <img :src="selectedMakeLogo" class="w-6 h-6 object-contain mix-blend-multiply dark:mix-blend-screen dark:invert" alt="">
                         </template>
                         <template x-if="!selectedMakeLogo && filters.make_id">
                              <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
@@ -278,7 +278,7 @@ function renderFilterContent($prefix = 'desktop') {
                                             
                                             <div class="w-8 h-8 flex items-center justify-center shrink-0">
                                                 <?php if ($make['logo_url']): ?>
-                                                    <img src="<?php echo $make['logo_url']; ?>" alt="" class="w-full h-full object-contain mix-blend-multiply dark:filter dark:brightness-0 dark:invert opacity-70 group-hover:opacity-100 transition-opacity" :class="filters.make_id == '<?php echo $make['id']; ?>' ? 'opacity-100' : ''">
+                                                    <img src="<?php echo $make['logo_url']; ?>" alt="" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-screen dark:invert opacity-70 group-hover:opacity-100 transition-opacity" :class="filters.make_id == '<?php echo $make['id']; ?>' ? 'opacity-100' : ''">
                                                 <?php else: ?>
                                                      <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
                                                           <span class="text-xs font-bold text-gray-500 dark:text-gray-400"><?php echo substr($make['name'], 0, 1); ?></span>
@@ -368,31 +368,35 @@ function renderFilterContent($prefix = 'desktop') {
 
     <!-- Body Type -->
     <div x-data="{ open: true }" class="border-t border-gray-100 dark:border-gray-800 pt-6">
+    <div x-data="{ open: true, showAllBodyTypes: false }" class="border-t border-gray-100 dark:border-gray-800 pt-6">
         <button @click="open = !open" class="flex items-center justify-between w-full mb-4">
             <h3 class="font-bold text-gray-900 dark:text-white"><?php echo __('Body Type'); ?></h3>
             <svg class="w-5 h-5 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </button>
         <div x-show="open" x-collapse fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <div class="grid grid-cols-1 gap-3">
-                <?php foreach (array_slice($bodyTypes ?: [], 0, 4) as $type): ?>
-                    <label class="relative flex items-center p-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-gray-900 dark:hover:border-gray-100 cursor-pointer transition-all group"
-                           :class="filters.body_type_id == <?php echo $type['id']; ?> ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-900 dark:border-gray-100 ring-1 ring-gray-900 dark:ring-gray-100' : 'bg-white dark:bg-gray-800'">
+            <div class="grid grid-cols-1 gap-2">
+                <?php foreach ($bodyTypes as $index => $type): ?>
+                    <label class="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer group hover:bg-white dark:hover:bg-gray-800 transition-all"
+                           <?php if ($index >= 4): ?>x-show="showAllBodyTypes" x-transition.opacity<?php endif; ?>
+                           :class="filters.body_type_id == <?php echo $type['id']; ?> ? 'border-accent shadow-lg shadow-accent/5 ring-1 ring-accent bg-white dark:bg-gray-800' : ''">
                         <input type="radio" x-model="filters.body_type_id" value="<?php echo $type['id']; ?>" class="hidden">
                         <?php if ($type['icon_url']): ?>
-                            <img src="<?php echo $type['icon_url']; ?>" class="w-12 h-8 object-contain mr-4 mix-blend-multiply dark:filter dark:brightness-0 dark:invert" alt="">
+                            <img src="<?php echo $type['icon_url']; ?>" class="w-10 h-6 object-contain mix-blend-multiply dark:mix-blend-screen dark:invert opacity-70 group-hover:opacity-100 transition-opacity" alt="">
                         <?php endif; ?>
-                        <span class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
-                              :class="filters.body_type_id == <?php echo $type['id']; ?> ? 'text-gray-900 dark:text-white font-bold' : ''"><?php echo $type['name']; ?></span>
+                        <span class="font-bold text-sm text-gray-700 dark:text-gray-300 group-hover:text-accent transition-colors uppercase tracking-tight"
+                              :class="filters.body_type_id == <?php echo $type['id']; ?> ? 'text-accent' : ''"><?php echo $type['name']; ?></span>
                         <div x-show="filters.body_type_id == <?php echo $type['id']; ?>" class="ml-auto">
-                            <svg class="w-5 h-5 text-gray-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         </div>
                     </label>
                 <?php endforeach; ?>
             </div>
-            <button class="mt-4 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-bold text-sm flex items-center gap-1 group transition-colors">
-                <?php echo __('Show more'); ?>
-                <svg class="w-4 h-4 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            <?php if (count($bodyTypes) > 4): ?>
+            <button @click="showAllBodyTypes = !showAllBodyTypes" class="mt-4 text-gray-500 hover:text-accent font-black text-[10px] uppercase tracking-widest flex items-center gap-1 group transition-colors">
+                <span x-text="showAllBodyTypes ? 'Show less' : 'Show more'"></span>
+                <svg class="w-3 h-3 transition-transform" :class="showAllBodyTypes ? 'rotate-180' : 'group-hover:translate-y-0.5'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -417,8 +421,8 @@ function renderCollapsibleFilter($title, $key, $options) {
         <div x-show="open" x-collapse class="mt-4 grid grid-cols-1 gap-2">
             <?php foreach ($safeOptions as $opt): ?>
                 <label class="flex items-center gap-3 cursor-pointer py-1.5 group">
-                    <input type="checkbox" x-model="filters.<?php echo $key; ?>" value="<?php echo $opt; ?>" class="w-4 h-4 rounded text-gray-900 dark:text-white focus:ring-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-700">
-                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"><?php echo $opt; ?></span>
+                    <input type="checkbox" x-model="filters.<?php echo $key; ?>" value="<?php echo $opt; ?>" class="w-4 h-4 rounded text-accent focus:ring-accent border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-accent transition-colors"><?php echo $opt; ?></span>
                 </label>
             <?php endforeach; ?>
         </div>
@@ -439,14 +443,14 @@ function renderCollapsibleFilter($title, $key, $options) {
     height: 20px;
     width: 20px;
     border-radius: 50%;
-    background: #111827; /* gray-900 */
+    background: #f97316; /* accent-orange */
     cursor: pointer;
     border: 3px solid white;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 .dark .slider-thumb::-webkit-slider-thumb {
-    background: #ffffff;
-    border-color: #111827;
+    background: #f97316;
+    border-color: #0f172a;
 }
 .no-scrollbar::-webkit-scrollbar {
     display: none;

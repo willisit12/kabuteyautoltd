@@ -38,7 +38,7 @@ foreach ($allMakes as $make) {
         <nav class="flex mb-8 text-sm" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
-                    <a href="<?php echo url(''); ?>" class="inline-flex items-center text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-500">
+                    <a href="<?php echo url(''); ?>" class="inline-flex items-center text-gray-500 hover:text-accent dark:text-gray-400 dark:hover:text-accent">
                         Home
                     </a>
                 </li>
@@ -59,14 +59,15 @@ foreach ($allMakes as $make) {
         <div class="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-4 md:gap-6 mb-16">
             <?php foreach ($popularMakes as $make): ?>
             <a href="<?php echo url('cars/' . strtolower(str_replace(' ', '-', $make['name']))); ?>" class="flex flex-col items-center gap-3 group">
-                <div class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 dark:bg-white dark:border-gray-200 group-hover:shadow-md group-hover:border-emerald-200 transition-all p-3">
+                <div class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center border border-gray-100 dark:border-gray-700 group-hover:shadow-md group-hover:border-accent/30 transition-all p-3 overflow-hidden">
                     <?php if ($make['logo_url']): ?>
-                        <img src="<?php echo $make['logo_url']; ?>" alt="<?php echo clean($make['name']); ?>" class="w-full h-full object-contain group-hover:scale-110 transition-transform">
+                        <img src="<?php echo $make['logo_url']; ?>" alt="<?php echo clean($make['name']); ?>" 
+                             class="w-full h-full object-contain group-hover:scale-110 transition-transform dark:invert dark:mix-blend-screen">
                     <?php else: ?>
                         <span class="font-bold text-gray-400 text-xs"><?php echo substr($make['name'], 0, 3); ?></span>
                     <?php endif; ?>
                 </div>
-                <span class="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-emerald-600 transition-colors text-center"><?php echo clean($make['name']); ?></span>
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-accent transition-colors text-center"><?php echo clean($make['name']); ?></span>
             </a>
             <?php endforeach; ?>
         </div>
@@ -76,7 +77,7 @@ foreach ($allMakes as $make) {
             <div class="flex flex-wrap gap-x-4 gap-y-2 justify-start sm:justify-between px-2">
                 <?php foreach (range('A', 'Z') as $letter): ?>
                     <?php if (isset($groupedMakes[$letter])): ?>
-                        <a href="#letter-<?php echo $letter; ?>" class="font-bold text-gray-900 dark:text-white hover:text-emerald-600 transition-colors text-sm sm:text-base">
+                        <a href="#letter-<?php echo $letter; ?>" class="font-bold text-gray-900 dark:text-white hover:text-accent transition-colors text-sm sm:text-base">
                             <?php echo $letter; ?>
                         </a>
                     <?php else: ?>
@@ -102,14 +103,14 @@ foreach ($allMakes as $make) {
                             <a href="<?php echo url('cars/' . strtolower(str_replace(' ', '-', $make['name']))); ?>" class="flex items-center gap-4 group">
                                 <div class="w-10 h-10 object-contain flex items-center justify-center shrink-0">
                                     <?php if ($make['logo_url']): ?>
-                                        <img src="<?php echo $make['logo_url']; ?>" alt="<?php echo clean($make['name']); ?>" class="w-full h-full object-contain filter " style="mix-blend-mode: multiply;">
+                                        <img src="<?php echo $make['logo_url']; ?>" alt="<?php echo clean($make['name']); ?>" class="w-full h-full object-contain dark:invert dark:mix-blend-screen">
                                     <?php else: ?>
                                         <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                                             <span class="text-xs font-bold text-gray-400"><?php echo substr($make['name'], 0, 1); ?></span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
-                                <span class="font-bold text-sm md:text-base text-gray-800 dark:text-gray-200 group-hover:text-emerald-600 transition-colors">
+                                <span class="font-bold text-sm md:text-base text-gray-800 dark:text-gray-200 group-hover:text-accent transition-colors">
                                     <?php echo clean($make['name']); ?>
                                 </span>
                             </a>
@@ -123,13 +124,6 @@ foreach ($allMakes as $make) {
     </div>
 </div>
 
-<?php 
-// For mix-blend-mode dark mode support
-?>
-<style>
-    .dark .mix-blend-mode\: multiply {
-        filter: brightness(0) invert(1);
-    }
-</style>
+
 
 <?php include_once __DIR__ . '/../includes/layout/footer.php'; ?>

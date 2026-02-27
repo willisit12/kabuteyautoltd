@@ -120,7 +120,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                     <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-2">Shop by Make</h2>
                     <p class="text-gray-500 dark:text-gray-400 text-sm">You can search for cars by make.</p>
                 </div>
-                <a href="<?php echo url('brand-selection'); ?>" class="text-emerald-600 font-medium hover:text-emerald-700 flex items-center gap-1 transition-colors">
+                <a href="<?php echo url('brand-selection'); ?>" class="text-accent font-medium hover:text-accent/80 flex items-center gap-1 transition-colors">
                     View all makes <i class="fas fa-chevron-right text-xs"></i>
                 </a>
             </div>
@@ -132,14 +132,14 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 foreach ($popularMakes as $make): 
                 ?>
                 <a href="<?php echo url('cars/' . strtolower(str_replace(' ', '-', $make['name']))); ?>" class="flex flex-col items-center gap-3 group">
-                    <div class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 dark:bg-white dark:border-gray-200 group-hover:shadow-md group-hover:border-emerald-200 transition-all p-3">
+                    <div class="h-16 w-16 md:h-20 md:w-20 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 dark:bg-gray-800 dark:border-gray-700 group-hover:shadow-md group-hover:border-accent/30 transition-all p-3">
                         <?php if ($make['logo_url']): ?>
-                            <img src="<?php echo $make['logo_url']; ?>" alt="<?php echo clean($make['name']); ?>" class="w-full h-full object-contain group-hover:scale-110 transition-transform">
+                            <img src="<?php echo $make['logo_url']; ?>" alt="<?php echo clean($make['name']); ?>" class="w-full h-full object-contain group-hover:scale-110 transition-transform mix-blend-multiply dark:mix-blend-screen dark:invert">
                         <?php else: ?>
                             <span class="font-bold text-gray-400 text-xs"><?php echo substr($make['name'], 0, 3); ?></span>
                         <?php endif; ?>
                     </div>
-                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-emerald-600 transition-colors text-center"><?php echo clean($make['name']); ?></span>
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-accent transition-colors text-center"><?php echo clean($make['name']); ?></span>
                 </a>
                 <?php endforeach; ?>
             </div>
@@ -166,7 +166,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                             <i class="fas fa-car-side text-4xl text-gray-300"></i>
                         <?php endif; ?>
                     </div>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-emerald-600 transition-colors text-center"><?php echo clean($type['name']); ?></span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-accent transition-colors text-center"><?php echo clean($type['name']); ?></span>
                 </a>
                 <?php endforeach; ?>
             </div>
