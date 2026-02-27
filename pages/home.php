@@ -426,7 +426,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                         });
                     });
                     
-                    if (newCards.length < 6) {
+                    if (newCards.length < 8) {
                         this.hasMore = false;
                     }
                     

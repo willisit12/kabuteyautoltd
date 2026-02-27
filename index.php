@@ -41,6 +41,7 @@ $router->get('/admin/users', __DIR__ . '/admin/users/index.php')->middleware(Aut
 
 // API Routes
 $router->get('/api/language', __DIR__ . '/pages/api/language.php');
+$router->get('/api/get-cars', __DIR__ . '/pages/api/get-cars.php');
 $router->post('/api/convert-currency', __DIR__ . '/pages/api/convert-currency.php');
 
 // Dispatch

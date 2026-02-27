@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/functions.php';
 
 $page = intval($_GET['page'] ?? 1);
-$limit = 6;
+$limit = 8;
 $offset = ($page - 1) * $limit;
 
 $filters = [
