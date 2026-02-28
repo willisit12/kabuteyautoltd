@@ -225,7 +225,8 @@ function renderAdminLayout($content, $pageTitle = 'Dashboard') {
                 navLink('dashboard.php', 'Overview', 'fa-th-large', $current_uri);
                 navLink('cars/', 'Fleet Management', 'fa-car', $current_uri);
                 navLink('cars/import.php', 'Bulk Import', 'fa-file-import', $current_uri);
-                navLink('inquiries/', 'Communications', 'fa-envelope', $current_uri);
+                navLink('orders/', 'Acquisitions', 'fa-shopping-bag', $current_uri);
+                navLink('inquiries/', 'Dialogue Center', 'fa-comments', $current_uri);
                 ?>
 
                 <p x-show="!sidebarCollapsed || mobileMenu" class="text-[10px] font-black uppercase tracking-widest text-white/30 mb-4 ml-2 pt-6" x-transition.opacity>Security & Identity</p>

@@ -61,13 +61,26 @@ class SecurityMiddleware implements MiddlewareInterface
     {
         http_response_code(419); // Page Expired/CSRF fail
         
-        $errorFile = dirname(__DIR__) . '/pages/404.php';
-        if (file_exists($errorFile)) {
-            $errorTitle = "Security Check Failed";
-            $errorMessage = "Your session has expired or the security token is invalid. Please try again.";
-            require_once $errorFile;
+        $isJson = str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') || 
+                  str_contains($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') ||
+                  (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+        if ($isJson) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'error',
+                'error' => 'Security token mismatch. Please refresh the page.',
+                'code' => 419
+            ]);
         } else {
-            echo "<h1>419 Security Token Mismatch</h1><p>The CSRF token is invalid or has expired.</p>";
+            $errorFile = dirname(__DIR__) . '/pages/404.php';
+            if (file_exists($errorFile)) {
+                $errorTitle = "Security Check Failed";
+                $errorMessage = "Your session has expired or the security token is invalid. Please try again.";
+                require_once $errorFile;
+            } else {
+                echo "<h1>419 Security Token Mismatch</h1><p>The CSRF token is invalid or has expired.</p>";
+            }
         }
         exit;
     }

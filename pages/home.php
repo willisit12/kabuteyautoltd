@@ -15,6 +15,15 @@ if (count($featuredCars) > 0 && count($featuredCars) < 6) {
 // Initial cars for the grid
 $initialLimit = 8;
 $latestCars = searchCars([], $initialLimit);
+$favoriteIds = isLoggedIn() ? getUserFavoriteIds($_SESSION['user_id'] ?? null) : [];
+
+foreach ($latestCars as &$car) {
+    $car['is_favorited'] = in_array($car['id'], $favoriteIds);
+}
+foreach ($featuredCars as &$car) {
+    $car['is_favorited'] = in_array($car['id'], $favoriteIds);
+}
+
 $makes = getCarMakes();
 
 // Fetch approved testimonials
@@ -199,6 +208,48 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 <div class="swiper-slide !w-[90vw] md:!w-[60vw]">
                     <div class="relative h-[450px] md:h-[600px] rounded-[2rem] md:rounded-[3rem] overflow-hidden group">
                         <img src="<?php echo $image; ?>" alt="<?php echo clean($car['make'] . ' ' . $car['model']); ?>" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+                        
+                        <!-- Favorite Heart (Same as Car Card) -->
+                        <div x-data="{ 
+                            isFavorited: <?php echo $car['is_favorited'] ? 'true' : 'false'; ?>,
+                            isLoading: false,
+                            toggleFavorite(carId) {
+                                if (!window.isLoggedIn) {
+                                    window.dispatchEvent(new CustomEvent('open-login-modal'));
+                                    return;
+                                }
+                                this.isLoading = true;
+                                fetch('<?php echo url('api/favorites'); ?>', {
+                                    method: 'POST',
+                                    headers: { 
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': window.csrfToken
+                                    },
+                                    body: JSON.stringify({ car_id: carId })
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.status === 'success') {
+                                        this.isFavorited = (data.favorite_status === 'added');
+                                        window.dispatchEvent(new CustomEvent('notify', { 
+                                            detail: { 
+                                                message: this.isFavorited ? 'Added to curated collection' : 'Removed from curated collection',
+                                                type: 'success'
+                                            } 
+                                        }));
+                                    }
+                                })
+                                .catch(err => console.error(err))
+                                .finally(() => this.isLoading = false);
+                            }
+                        }" class="absolute top-6 right-6 z-30">
+                            <button @click.prevent="toggleFavorite(<?php echo $car['id']; ?>)" 
+                                    :class="isLoading ? 'opacity-50' : ''"
+                                    class="w-12 h-12 rounded-full bg-white shadow-xl flex items-center justify-center text-red-500 hover:scale-110 transition-all">
+                                <i class="fa-heart" :class="isFavorited ? 'fas' : 'far text-gray-400'"></i>
+                            </button>
+                        </div>
+
                         <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent"></div>
                         <div class="absolute bottom-8 left-8 right-8 md:bottom-12 md:left-12 md:right-12 text-white">
                             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">

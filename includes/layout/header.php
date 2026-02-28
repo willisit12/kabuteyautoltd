@@ -7,6 +7,7 @@
     
     <meta name="description" content="<?php echo SITE_TAGLINE; ?>">
     <link rel="icon" href="<?php echo url('images/car.png'); ?>">
+    <meta name="csrf-token" content="<?php echo generateCSRFToken(); ?>">
 
     <!-- Core Styles & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,6 +49,8 @@
                 document.documentElement.classList.remove('dark');
             }
             window.BASE_URL = '<?php echo SITE_URL; ?>';
+            window.isLoggedIn = <?php echo isLoggedIn() ? 'true' : 'false'; ?>;
+            window.csrfToken = '<?php echo generateCSRFToken(); ?>';
         })();
     </script>
 
@@ -332,15 +335,72 @@
                     <div class="h-6 w-[1px] bg-border/20"></div>
 
                     <?php if (isLoggedIn()): ?>
-                        <a href="<?php echo url('admin/dashboard'); ?>" class="glass px-6 py-2.5 rounded-full text-foreground hover:bg-foreground/5 transition-all font-bold flex items-center gap-2">
-                            <i class="fas fa-grid-2 text-accent"></i> <?php echo __('nav_dashboard'); ?>
+                        <?php 
+                        $user = getUserInfo(); 
+                        $unreadCount = getUnreadNotificationsCount($user['id']);
+                        $recentNotifications = getRecentNotifications($user['id'], 5);
+                        ?>
+                        <!-- Persistent Notifications -->
+                        <div x-data="{ nOpen: false }" class="relative">
+                            <button @click="nOpen = !nOpen" @click.away="nOpen = false" class="relative group p-2 text-foreground/60 hover:text-accent transition-all duration-300">
+                                <i class="fas fa-bell text-lg"></i>
+                                <?php if ($unreadCount > 0): ?>
+                                    <span class="absolute top-1 right-1 w-4 h-4 bg-accent text-white rounded-full flex items-center justify-center text-[8px] font-black border-2 border-background animate-bounce">
+                                        <?php echo $unreadCount; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </button>
+
+                            <!-- Notification Dropdown -->
+                            <div 
+                                x-show="nOpen" 
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+                                class="absolute right-0 mt-6 w-80 glass rounded-[2.5rem] border border-border/50 shadow-2xl z-50 overflow-hidden"
+                                style="display: none;"
+                            >
+                                <div class="p-6 border-b border-border/30 bg-muted/30">
+                                    <h3 class="text-[10px] font-black uppercase tracking-widest text-foreground">Intelligence Alerts</h3>
+                                </div>
+                                <div class="max-h-96 overflow-y-auto divide-y divide-border/20">
+                                    <?php if (empty($recentNotifications)): ?>
+                                        <div class="p-10 text-center">
+                                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">No pending alerts</p>
+                                        </div>
+                                    <?php else: ?>
+                                        <?php foreach ($recentNotifications as $notif): ?>
+                                            <a href="<?php echo url($notif['link'] ?: 'dashboard'); ?>" class="block p-6 hover:bg-accent/[0.03] transition-all <?php echo $notif['is_read'] ? 'opacity-60' : ''; ?>">
+                                                <div class="flex items-start gap-4">
+                                                    <div class="w-2 h-2 rounded-full mt-2 <?php echo $notif['is_read'] ? 'bg-muted' : 'bg-accent animate-pulse'; ?>"></div>
+                                                    <div class="flex-1">
+                                                        <h4 class="text-[11px] font-black text-foreground uppercase tracking-tight mb-1"><?php echo clean($notif['title']); ?></h4>
+                                                        <p class="text-[10px] font-medium text-muted-foreground leading-relaxed line-clamp-2 italic">"<?php echo clean($notif['message']); ?>"</p>
+                                                        <span class="text-[7px] font-black uppercase text-accent/50 mt-2 block"><?php echo date('M d, H:i', strtotime($notif['created_at'])); ?></span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="p-4 bg-muted/20 border-t border-border/30 text-center">
+                                    <a href="<?php echo url('dashboard'); ?>" class="text-[8px] font-black uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">Intelligence Portfolio</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="<?php echo url('dashboard'); ?>" class="glass px-6 py-2.5 rounded-full text-foreground hover:bg-accent hover:text-white transition-all font-black uppercase tracking-widest text-[9px] flex items-center gap-2 group ml-2 shadow-sm">
+                            <i class="fas fa-id-badge text-accent group-hover:text-white"></i> 
+                            Portal
                         </a>
                     <?php else: ?>
-                        <a href="<?php echo url('login'); ?>" class="text-foreground hover:text-accent transition-all duration-300 flex items-center gap-2">
-                            <div class="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-accent">
-                                <i class="fas fa-user-circle text-lg"></i>
-                            </div>
-                        </a>
+                        <div class="flex items-center gap-4 ml-2">
+                            <a href="<?php echo url('login'); ?>" class="text-[10px] font-black uppercase tracking-widest text-foreground/60 hover:text-accent transition-colors">Login</a>
+                            <a href="<?php echo url('register'); ?>" class="px-7 py-3 rounded-full bg-accent text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(249,115,22,0.3)] hover:scale-105 active:scale-95 transition-all">Join Circle</a>
+                        </div>
                     <?php endif; ?>
 
                     <!-- Theme Toggle Component -->
@@ -408,6 +468,17 @@
                 <i class="fas fa-envelope w-5 text-accent group-hover:scale-110 transition-transform"></i>
                 <span class="font-bold text-sm tracking-tight"><?php echo __('nav_contact'); ?></span>
             </a>
+            <?php if (isLoggedIn()): ?>
+                <a href="<?php echo url('dashboard'); ?>" class="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 border border-white/10 group">
+                    <i class="fas fa-id-badge w-5 text-accent group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold text-sm tracking-tight">Member Portal</span>
+                </a>
+            <?php else: ?>
+                <div class="grid grid-cols-2 gap-3 px-2 pt-4">
+                    <a href="<?php echo url('login'); ?>" class="py-4 rounded-2xl border border-white/10 bg-white/5 text-center font-black uppercase tracking-widest text-[10px]">Login</a>
+                    <a href="<?php echo url('register'); ?>" class="py-4 rounded-2xl bg-accent text-white text-center font-black uppercase tracking-widest text-[10px]">Join Circle</a>
+                </div>
+            <?php endif; ?>
 
             <p class="text-[10px] font-black uppercase tracking-widest text-white/30 mb-4 ml-2 pt-6">Preferences</p>
             
@@ -573,4 +644,58 @@
             if (p) { p.classList.add('loaded'); document.body.classList.remove('loading','preloader-active'); }
         }, 3000);
     </script>
+
+    <!-- Authentication Interceptor Modal -->
+    <div x-data="{ open: false }" 
+         x-show="open" 
+         @open-login-modal.window="open = true"
+         x-cloak
+         class="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <div @click.away="open = false" 
+             class="bg-white dark:bg-card w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden text-center border border-border/10">
+            
+            <button @click="open = false" class="absolute top-6 right-6 text-foreground/40 hover:text-foreground transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+
+            <div class="mb-8">
+                <div class="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-accent">
+                    <i class="fas fa-shield-heart text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-black text-foreground tracking-tight uppercase mb-2">Attention</h3>
+                <p class="text-sm font-bold text-muted-foreground opacity-70">Please log in to build your curated collection.</p>
+            </div>
+
+            <a href="<?php echo url('login'); ?>" 
+               class="inline-block w-full py-5 rounded-[2rem] bg-[#00c58d] text-white font-black uppercase tracking-widest text-[10px] shadow-[0_10px_30px_rgba(0,197,141,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all">
+                Member Entrance
+            </a>
+        </div>
+    </div>
+
+    <!-- Global Intelligence Notifications -->
+    <div x-data="{ notifications: [] }" 
+         @notify.window="let id = Date.now(); notifications.push({ id, ...$event.detail }); setTimeout(() => notifications = notifications.filter(n => n.id !== id), 4000)"
+         class="fixed bottom-8 right-8 z-[1001] flex flex-col gap-4 pointer-events-none">
+        <template x-for="n in notifications" :key="n.id">
+            <div x-transition
+                 class="glass px-8 py-5 rounded-3xl shadow-2xl flex items-center gap-4 border-l-4 pointer-events-auto min-w-[300px]"
+                 :class="n.type === 'success' ? 'border-green-500' : 'border-red-500'">
+                <div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" :class="n.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'">
+                    <i class="fas" :class="n.type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-40" x-text="n.type === 'success' ? 'Intelligence Update' : 'System Alert'"></span>
+                    <span class="font-bold text-sm text-foreground" x-text="n.message"></span>
+                </div>
+            </div>
+        </template>
+    </div>
 </body>

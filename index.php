@@ -10,6 +10,8 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/Router.php';
 require_once __DIR__ . '/includes/SecurityMiddleware.php';
 require_once __DIR__ . '/includes/AuthMiddleware.php';
+require_once __DIR__ . '/includes/AdminMiddleware.php';
+require_once __DIR__ . '/includes/CustomerMiddleware.php';
 
 $router = new Router(BASE_PATH);
 
@@ -60,26 +62,50 @@ $router->get('/about', __DIR__ . '/pages/about.php');
 $router->get('/contact', __DIR__ . '/pages/contact.php');
 $router->post('/contact', __DIR__ . '/pages/contact.php');
 $router->get('/brand-selection', __DIR__ . '/pages/brand-selection.php');
-$router->get('/login', __DIR__ . '/pages/login.php');
-$router->post('/login', __DIR__ . '/pages/login.php');
+$router->get('/login', __DIR__ . '/pages/customer/login.php');
+$router->post('/login', __DIR__ . '/pages/customer/login.php');
+$router->get('/register', __DIR__ . '/pages/customer/register.php');
+$router->post('/register', __DIR__ . '/pages/customer/register.php');
+$router->get('/dashboard', function($vars) {
+    if (!isLoggedIn()) {
+        redirect(url('login'));
+    }
+    $user = getUserInfo();
+    if ($user['role'] === 'admin') {
+        require_once __DIR__ . '/admin/dashboard.php';
+    } else {
+        require_once __DIR__ . '/pages/customer/dashboard.php';
+    }
+});
 $router->get('/logout', function() {
     logout();
 });
 
+// Member Portal Routes (Protected)
+$router->get('/customer/orders', __DIR__ . '/pages/customer/orders/index.php')->middleware(CustomerMiddleware::class);
+$router->get('/customer/orders/view/{id}', __DIR__ . '/pages/customer/orders/view.php')->middleware(CustomerMiddleware::class);
+$router->post('/customer/orders/delete', __DIR__ . '/pages/customer/orders/delete.php')->middleware(CustomerMiddleware::class);
+$router->get('/customer/favorites', __DIR__ . '/pages/customer/favorites.php')->middleware(CustomerMiddleware::class);
+$router->get('/customer/inquiries', __DIR__ . '/pages/customer/inquiries.php')->middleware(CustomerMiddleware::class);
+$router->get('/customer/profile', __DIR__ . '/pages/customer/profile.php')->middleware(CustomerMiddleware::class);
+$router->post('/customer/profile', __DIR__ . '/pages/customer/profile.php')->middleware(CustomerMiddleware::class);
+
 // Admin Routes (Protected)
-$router->get('/admin', __DIR__ . '/admin/dashboard.php')->middleware(AuthMiddleware::class);
-$router->get('/admin/dashboard', __DIR__ . '/admin/dashboard.php')->middleware(AuthMiddleware::class);
-$router->get('/admin/cars', __DIR__ . '/admin/cars/index.php')->middleware(AuthMiddleware::class);
-$router->get('/admin/cars/add', __DIR__ . '/admin/cars/add.php')->middleware(AuthMiddleware::class);
-$router->post('/admin/cars/add', __DIR__ . '/admin/cars/add.php')->middleware(AuthMiddleware::class);
-$router->get('/admin/cars/edit/{id}', __DIR__ . '/admin/cars/edit.php')->middleware(AuthMiddleware::class);
-$router->post('/admin/cars/edit/{id}', __DIR__ . '/admin/cars/edit.php')->middleware(AuthMiddleware::class);
-$router->get('/admin/users', __DIR__ . '/admin/users/index.php')->middleware(AuthMiddleware::class);
+$router->get('/admin', __DIR__ . '/admin/dashboard.php')->middleware(AdminMiddleware::class);
+$router->get('/admin/dashboard', __DIR__ . '/admin/dashboard.php')->middleware(AdminMiddleware::class);
+$router->get('/admin/cars', __DIR__ . '/admin/cars/index.php')->middleware(AdminMiddleware::class);
+$router->get('/admin/cars/add', __DIR__ . '/admin/cars/add.php')->middleware(AdminMiddleware::class);
+$router->post('/admin/cars/add', __DIR__ . '/admin/cars/add.php')->middleware(AdminMiddleware::class);
+$router->get('/admin/cars/edit/{id}', __DIR__ . '/admin/cars/edit.php')->middleware(AdminMiddleware::class);
+$router->post('/admin/cars/edit/{id}', __DIR__ . '/admin/cars/edit.php')->middleware(AdminMiddleware::class);
+$router->get('/admin/users', __DIR__ . '/admin/users/index.php')->middleware(AdminMiddleware::class);
 
 // API Routes
 $router->get('/api/language', __DIR__ . '/pages/api/language.php');
 $router->get('/api/get-cars', __DIR__ . '/pages/api/get-cars.php');
 $router->post('/api/convert-currency', __DIR__ . '/pages/api/convert-currency.php');
+$router->post('/api/favorites', __DIR__ . '/pages/api/favorites.php')->middleware(AuthMiddleware::class);
+$router->post('/api/orders', __DIR__ . '/pages/api/orders.php')->middleware(AuthMiddleware::class);
 
 // Dispatch
 $router->dispatch();

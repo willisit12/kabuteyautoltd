@@ -13,13 +13,17 @@ if ($slug) {
     $car = getCarById($id);
 }
 
-if (!$car) {
-    http_response_code(404);
-    include_once __DIR__ . '/404.php';
-    exit;
+$pageTitle = $car['year'] . ' ' . $car['make'] . ' ' . $car['model'];
+
+// Check if favorited
+$isFavorited = false;
+if (isLoggedIn()) {
+    $db = getDB();
+    $stmt = $db->prepare("SELECT 1 FROM favorites WHERE user_id = ? AND car_id = ?");
+    $stmt->execute([$_SESSION['user_id'], $car['id']]);
+    $isFavorited = (bool)$stmt->fetch();
 }
 
-$pageTitle = $car['year'] . ' ' . $car['make'] . ' ' . $car['model'];
 include_once __DIR__ . '/../includes/layout/header.php';
 ?>
 
@@ -184,18 +188,230 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 
                 <!-- Actions -->
                 <div class="reveal-section flex flex-col sm:flex-row gap-6">
-                    <a href="<?php echo url('contact?id=' . $car['id']); ?>" class="flex-1 btn-premium bg-accent text-white text-center py-6 rounded-3xl font-black uppercase tracking-tighter text-lg shadow-[0_15px_40px_rgba(249,115,22,0.4)] hover:scale-[1.02] active:scale-95 transition-all">
-                        Initiate Acquisition
-                    </a>
                     <?php if (isLoggedIn()): ?>
-                        <a href="<?php echo url('admin/cars/edit.php?id=' . $car['id']); ?>" class="w-full sm:w-20 h-20 rounded-3xl bg-foreground text-background hover:bg-accent transition-all flex items-center justify-center shadow-xl group border border-transparent">
-                            <i class="fas fa-edit text-xl group-hover:scale-110 transition-transform"></i>
-                        </a>
+                        <!-- Acquisition Trigger -->
+                        <button 
+                            x-data="{ 
+                                loading: false,
+                                async initiate() {
+                                    if (!confirm('Are you ready to initiate the formal acquisition protocol for this vehicle?')) return;
+                                    this.loading = true;
+                                    try {
+                                        const res = await fetch('<?php echo url('api/orders'); ?>', {
+                                            method: 'POST',
+                                            headers: { 
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': window.csrfToken
+                                            },
+                                            body: JSON.stringify({ car_id: <?php echo $car['id']; ?> })
+                                        });
+                                        const data = await res.json();
+                                        if (data.status === 'success') {
+                                            window.location.href = '<?php echo url('dashboard'); ?>';
+                                        } else {
+                                            alert(data.error || 'Acquisition failure.');
+                                        }
+                                    } catch (e) { 
+                                        console.error(e); 
+                                        alert('Network protocol failure.');
+                                    } finally { 
+                                        this.loading = false; 
+                                    }
+                                }
+                            }"
+                            @click="initiate()"
+                            :disabled="loading"
+                            class="flex-1 bg-accent text-white text-center py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-[0_20px_50px_rgba(249,115,22,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50"
+                        >
+                            <span x-show="!loading">Initiate Acquisition</span>
+                            <span x-show="loading" class="flex items-center gap-2">
+                                <i class="fas fa-circle-notch animate-spin text-[10px]"></i> Processing...
+                            </span>
+                        </button>
+
+                        <!-- Favorite Toggle -->
+                        <!-- Favorite Controller -->
+                        <button 
+                            x-data="{ 
+                                favorited: <?php echo $car['is_favorited'] ? 'true' : 'false'; ?>,
+                                loading: false,
+                                async toggle() {
+                                    if (this.loading) return;
+                                    this.loading = true;
+                                    try {
+                                        const res = await fetch('<?php echo url('api/favorites'); ?>', {
+                                            method: 'POST',
+                                            headers: { 
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': window.csrfToken
+                                            },
+                                            body: JSON.stringify({ car_id: <?php echo $car['id']; ?> })
+                                        });
+                                        const data = await res.json();
+                                        if (data.status === 'success') {
+                                            this.favorited = (data.favorite_status === 'added');
+                                            window.dispatchEvent(new CustomEvent('notify', { 
+                                                detail: { 
+                                                    message: this.favorited ? 'Added to curated collection' : 'Removed from curated collection',
+                                                    type: 'success'
+                                                } 
+                                            }));
+                                        }
+                                    } catch (e) { console.error(e); }
+                                    finally { this.loading = false; }
+                                }
+                            }"
+                            @click="toggle()"
+                            :class="favorited ? 'bg-accent text-white shadow-[0_20px_50px_rgba(249,115,22,0.3)]' : 'bg-accent/10 border-accent/20 text-accent hover:bg-accent hover:text-white'"
+                            class="w-20 h-20 rounded-[2rem] border transition-all flex items-center justify-center shadow-sm relative group overflow-hidden shrink-0"
+                            title="Curate Asset"
+                        >
+                            <i class="fas fa-heart text-2xl transition-transform duration-300" :class="favorited ? 'scale-110' : 'group-hover:scale-125'"></i>
+                            <div x-show="loading" class="absolute inset-0 bg-accent/20 flex items-center justify-center">
+                                <i class="fas fa-circle-notch animate-spin text-white"></i>
+                            </div>
+                        </button>
+
+                        <!-- Expert Inquiry Trigger -->
+                        <button 
+                            @click="window.dispatchEvent(new CustomEvent('open-concierge'))"
+                            class="flex-1 bg-[#0F172A] text-white py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-[0_20px_50px_rgba(15,23,42,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group"
+                        >
+                            <i class="fas fa-comment-dots text-xl group-hover:rotate-12 transition-transform"></i>
+                            Expert Inquiry
+                        </button>
+
+                        <!-- Admin Edit -->
+                        <?php if (getUserInfo()['role'] === 'admin'): ?>
+                            <a href="<?php echo url('admin/cars/edit.php?id=' . $car['id']); ?>" class="w-full sm:w-20 h-20 rounded-3xl bg-foreground text-background hover:bg-accent transition-all flex items-center justify-center shadow-xl group border border-transparent">
+                                <i class="fas fa-edit text-xl group-hover:scale-110 transition-transform"></i>
+                            </a>
+                        <?php endif; ?>
+
+                    <?php else: ?>
+                        <!-- Guest Unified Access -->
+                        <button 
+                            @click="window.dispatchEvent(new CustomEvent('open-concierge'))"
+                            class="flex-1 bg-[#0F172A] text-white py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-[0_20px_50px_rgba(15,23,42,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group"
+                        >
+                            <i class="fas fa-comment-dots text-xl group-hover:rotate-12 transition-transform"></i>
+                            Expert Inquiry
+                        </button>
+
+                        <button 
+                            @click="window.dispatchEvent(new CustomEvent('open-login-modal'))"
+                            class="flex-1 bg-accent text-white py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-[0_20px_50px_rgba(249,115,22,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4"
+                        >
+                            <i class="fas fa-lock text-xl"></i>
+                            Identify for Access
+                        </button>
                     <?php endif; ?>
-                    <button class="w-full sm:w-20 h-20 rounded-3xl bg-muted border border-border text-foreground hover:bg-foreground hover:text-background transition-all flex items-center justify-center shadow-sm">
-                        <i class="fas fa-share-nodes text-xl"></i>
+                    
+                    <!-- Global Asset Sharing -->
+                    <button class="w-20 h-20 rounded-[2rem] bg-[#F1F5F9] text-[#475569] hover:bg-foreground hover:text-background transition-all flex items-center justify-center shadow-sm shrink-0 group">
+                        <i class="fas fa-share-nodes text-xl group-hover:scale-110 transition-transform"></i>
                     </button>
                 </div>
+
+                <?php if (!isLoggedIn()): ?>
+                    <!-- High-Fidelity Guest Inquiry Form -->
+                    <div class="mt-16 reveal-section relative overflow-hidden bg-gradient-to-br from-accent/5 via-white/5 to-accent/10 glass rounded-[3rem] p-10 md:p-16 border border-white/20 shadow-2xl">
+                        <div class="absolute -top-10 -right-10 w-64 h-64 bg-accent/10 rounded-full blur-3xl"></div>
+                        <i class="fas fa-paper-plane absolute top-12 right-12 text-accent/10 text-[120px] -rotate-12 pointer-events-none"></i>
+
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-2 mb-2">
+                                <a href="#" class="text-accent text-[10px] font-black uppercase tracking-widest hover:underline flex items-center gap-2">
+                                    How To Buy : Step-by-Step Instructions <i class="fas fa-chevron-right text-[8px]"></i>
+                                </a>
+                            </div>
+                            <h3 class="text-4xl font-black text-foreground uppercase tracking-tighter mb-12">Inquire <span class="text-gradient">Now</span></h3>
+
+                            <form 
+                                x-data="{
+                                    name: '',
+                                    country: 'United States',
+                                    email: '',
+                                    whatsapp: '',
+                                    message: '',
+                                    loading: false,
+                                    async submit() {
+                                        if (!this.email || !this.message) return;
+                                        this.loading = true;
+                                        try {
+                                            const res = await fetch('<?php echo url('api/inquire'); ?>', {
+                                                method: 'POST',
+                                                headers: { 
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': window.csrfToken
+                                                },
+                                                body: JSON.stringify({ 
+                                                    car_id: <?php echo $car['id']; ?>,
+                                                    name: this.name,
+                                                    country: this.country,
+                                                    email: this.email,
+                                                    whatsapp: this.whatsapp,
+                                                    message: this.message,
+                                                    subject: 'Premium Guest Inquiry: <?php echo clean($car['year'] . " " . $car['make'] . " " . $car['model']); ?>'
+                                                })
+                                            });
+                                            const data = await res.json();
+                                            if (data.status === 'success') {
+                                                window.dispatchEvent(new CustomEvent('notify', { 
+                                                    detail: { message: 'Intelligence dispatched to concierge.', type: 'success' } 
+                                                }));
+                                                this.name = ''; this.email = ''; this.whatsapp = ''; this.message = '';
+                                            }
+                                        } catch (e) { console.error(e); }
+                                        finally { this.loading = false; }
+                                    }
+                                }"
+                                @submit.prevent="submit()"
+                                class="grid grid-cols-1 md:grid-cols-2 gap-10"
+                            >
+                                <div class="space-y-10">
+                                    <div class="relative group">
+                                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 group-focus-within:text-accent transition-colors">Name *</label>
+                                        <input x-model="name" type="text" required placeholder="Architect of Motion" class="w-full bg-transparent border-b border-border/50 py-3 text-sm font-bold outline-none focus:border-accent transition-all">
+                                    </div>
+                                    <div class="relative group">
+                                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 group-focus-within:text-accent transition-colors">Country *</label>
+                                        <select x-model="country" class="w-full bg-transparent border-b border-border/50 py-3 text-sm font-bold outline-none focus:border-accent appearance-none transition-all">
+                                            <option>United States</option>
+                                            <option>Canada</option>
+                                            <option>United Kingdom</option>
+                                            <option>Germany</option>
+                                            <option>Other</option>
+                                        </select>
+                                        <i class="fas fa-chevron-down absolute right-0 bottom-4 text-[10px] text-muted-foreground pointer-events-none"></i>
+                                    </div>
+                                    <div class="relative group">
+                                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 group-focus-within:text-accent transition-colors">Email *</label>
+                                        <input x-model="email" type="email" required placeholder="elite@williamsauto.com" class="w-full bg-transparent border-b border-border/50 py-3 text-sm font-bold outline-none focus:border-accent transition-all">
+                                    </div>
+                                    <div class="relative group">
+                                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 group-focus-within:text-accent transition-colors">WhatsApp</label>
+                                        <input x-model="whatsapp" type="text" placeholder="+1 (555) 000-0000" class="w-full bg-transparent border-b border-border/50 py-3 text-sm font-bold outline-none focus:border-accent transition-all">
+                                    </div>
+                                </div>
+                                <div class="flex flex-col">
+                                    <div class="relative group flex-1 flex flex-col">
+                                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 group-focus-within:text-accent transition-colors">Your Inquiry *</label>
+                                        <textarea x-model="message" required placeholder="Specify your requirements (e.g., custom performance tuning, delivery logistics, or acquisition timelines)..." class="flex-1 w-full bg-muted/20 border border-border/30 rounded-[2rem] p-8 text-sm font-medium outline-none focus:ring-2 focus:ring-accent transition-all resize-none min-h-[250px] md:min-h-0"></textarea>
+                                    </div>
+                                    <button 
+                                        type="submit"
+                                        :disabled="loading"
+                                        class="mt-10 w-full py-6 bg-accent text-white rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                    >
+                                        <span x-show="!loading">Submit Dispatch</span>
+                                        <i x-show="loading" class="fas fa-circle-notch animate-spin"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         
@@ -220,30 +436,12 @@ include_once __DIR__ . '/../includes/layout/header.php';
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <?php foreach ($recommendedCars as $recCar): 
-                    $image = $recCar['primary_image'] ?? 'https://placehold.co/400x300?text=No+Image';
-                ?>
-                <div class="bg-card backdrop-blur-md rounded-[2rem] overflow-hidden border border-border hover:border-accent/50 transition-all duration-700 group hover:-translate-y-2 shadow-sm hover:shadow-xl">
-                    <div class="relative h-48 md:h-56 overflow-hidden">
-                        <img src="<?php echo url($image); ?>" alt="<?php echo clean($recCar['make'] . ' ' . $recCar['model']); ?>" class="w-full h-full object-cover transition duration-1000 group-hover:scale-110 group-hover:rotate-1">
-                        <div class="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-80"></div>
-                        <div class="absolute bottom-4 left-4">
-                            <h3 class="text-xl md:text-2xl font-black text-white group-hover:text-accent transition-colors tracking-tighter leading-none"><?php echo clean($recCar['make'] . ' ' . $recCar['model']); ?></h3>
-                            <span class="text-white/80 text-[10px] font-black uppercase tracking-[0.2em] block mt-1"><?php echo $recCar['year']; ?> | <?php echo formatMileage($recCar['mileage']); ?></span>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-black text-foreground tracking-tighter"><?php echo formatPrice($recCar['price']); ?></span>
-                                    <a href="<?php echo url('car-detail/' . $recCar['slug']); ?>" 
-                                       class="p-4 bg-muted/50 rounded-xl hover:bg-accent hover:text-white transition-all group/btn border border-border/50"
-                                       title="<?php echo __('view_details'); ?>">
-                                        <i class="fas fa-external-link-alt group-hover/btn:scale-110 transition-transform"></i>
-                                    </a>
-                        </div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
+                <?php 
+                $favoriteIds = isLoggedIn() ? getUserFavoriteIds($_SESSION['user_id']) : [];
+                foreach ($recommendedCars as $recCar): 
+                    $recCar['is_favorited'] = in_array($recCar['id'], $favoriteIds);
+                    renderCarCard($recCar);
+                endforeach; ?>
             </div>
             
             <div class="mt-10 text-center md:hidden">
@@ -447,3 +645,9 @@ include_once __DIR__ . '/../includes/layout/header.php';
         });
     });
 </script>
+
+<?php 
+$conciergeRendered = true; 
+renderChatConcierge($car['id']); 
+?>
+

@@ -8,18 +8,31 @@ $pageTitle = 'Contact Us';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
-        // Handle error
+        setFlash('error', 'Security integrity compromised.');
     } else {
-        $name = clean($_POST['name']);
-        $email = clean($_POST['email']);
-        $message = clean($_POST['message']);
+        $name = clean($_POST['name'] ?? '');
+        $email = clean($_POST['email'] ?? '');
+        $subject = clean($_POST['subject'] ?? 'General Inquiry');
+        $message = clean($_POST['message'] ?? '');
+        $carId = intval($_POST['car_id'] ?? 0);
         
-        // Logic for saving inquiry would go here
-        echo "<script>alert('Thank you for your inquiry! We will get back to you shortly.'); window.location.href='/contact';</script>";
-        exit;
+        $db = getDB();
+        $userId = isLoggedIn() ? $_SESSION['user_id'] : null;
+
+        try {
+            $stmt = $db->prepare("INSERT INTO inquiries (user_id, car_id, name, email, subject, message, status) VALUES (?, ?, ?, ?, ?, ?, 'PENDING')");
+            $stmt->execute([$userId, $carId > 0 ? $carId : null, $name, $email, $subject, $message]);
+            
+            setFlash('success', 'Thank you for your inquiry! Our concierge team will reach out shortly.');
+            redirect(url('contact' . ($carId ? '?id=' . $carId : '')));
+        } catch (PDOException $e) {
+            setFlash('error', 'We encountered a transmission failure: ' . $e->getMessage());
+        }
     }
 }
 
+$success = getFlash('success');
+$error = getFlash('error');
 $carId = intval($_GET['id'] ?? 0);
 $car = $carId ? getCarById($carId) : null;
 
@@ -101,8 +114,23 @@ include_once __DIR__ . '/../includes/layout/header.php';
                     
                     <h3 class="text-2xl md:text-3xl font-black text-foreground mb-8 tracking-tighter uppercase">Initiate <span class="text-accent">Inquiry.</span></h3>
                     
+                    <?php if ($success): ?>
+                        <div class="bg-green-500/10 border border-green-500/20 text-green-500 p-6 rounded-[2rem] mb-8 flex items-center gap-4 text-sm font-bold relative z-10">
+                            <i class="fas fa-check-circle text-xl"></i>
+                            <?php echo $success; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($error): ?>
+                        <div class="bg-red-500/10 border border-red-500/20 text-red-500 p-6 rounded-[2rem] mb-8 flex items-center gap-4 text-sm font-bold relative z-10">
+                            <i class="fas fa-exclamation-triangle text-xl"></i>
+                            <?php echo $error; ?>
+                        </div>
+                    <?php endif; ?>
+                    
                     <form method="POST" action="<?php echo url('contact'); ?>" class="space-y-8">
                         <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+                        <input type="hidden" name="car_id" value="<?php echo $carId; ?>">
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div class="space-y-3">

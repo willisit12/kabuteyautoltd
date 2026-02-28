@@ -7,6 +7,7 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/i18n.php'; // Load localization engine
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/component/chat-concierge.php'; // High-fidelity chat component
 
 // Generate safe URLs with base path
 function url($path = '') {
@@ -272,5 +273,116 @@ function getCarBySlug($slug) {
     $stmt->execute([$car['id']]);
     
     return $car;
+}
+// Get all favorite car IDs for a user
+function getUserFavoriteIds($userId) {
+    if (!$userId) return [];
+    $db = getDB();
+    try {
+        $stmt = $db->prepare("SELECT car_id FROM favorites WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    } catch (PDOException $e) {
+        return [];
+    }
+}
+
+/**
+ * NOTIFICATION ENGINE
+ */
+
+/**
+ * Creates a persistent notification for a user
+ */
+function createNotification($userId, $title, $message, $type = 'INFO', $link = null) {
+    if (!$userId) return false;
+    $db = getDB();
+    try {
+        $stmt = $db->prepare("INSERT INTO notifications (user_id, title, message, type, link) VALUES (?, ?, ?, ?, ?)");
+        return $stmt->execute([$userId, $title, $message, $type, $link]);
+    } catch (PDOException $e) {
+        error_log("Failed to create notification: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Retrieves unread notification count for a user
+ */
+function getUnreadNotificationsCount($userId) {
+    if (!$userId) return 0;
+    $db = getDB();
+    try {
+        $stmt = $db->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
+        $stmt->execute([$userId]);
+        return (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        return 0;
+    }
+}
+
+/**
+ * Retrieves recent notifications for a user
+ */
+function getRecentNotifications($userId, $limit = 5) {
+    if (!$userId) return [];
+    $db = getDB();
+    try {
+        $stmt = $db->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?");
+        $stmt->execute([$userId, (int)$limit]);
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        return [];
+    }
+}
+
+/**
+ * INQUIRY & CHAT HELPERS
+ */
+
+/**
+ * Retrieves chat messages for a specific inquiry
+ */
+function getInquiryMessages($inquiryId) {
+    $db = getDB();
+    try {
+        $stmt = $db->prepare("
+            SELECT m.*, u.name as sender_name, u.avatar_url, u.role as sender_role
+            FROM inquiry_messages m
+            LEFT JOIN users u ON m.sender_id = u.id
+            WHERE m.inquiry_id = ?
+            ORDER BY m.created_at ASC
+        ");
+        $stmt->execute([($inquiryId)]);
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        return [];
+    }
+}
+
+/**
+ * Sends a message in an inquiry thread
+ */
+function sendInquiryMessage($inquiryId, $senderId, $message) {
+    $db = getDB();
+    try {
+        $db->beginTransaction();
+
+        $stmt = $db->prepare("INSERT INTO inquiry_messages (inquiry_id, sender_id, message) VALUES (?, ?, ?)");
+        $stmt->execute([$inquiryId, $senderId, $message]);
+
+        // Update inquiry status if needed
+        $user = getUserInfo(); // Uses session, assumes we are the ones sending
+        $status = ($user['role'] === 'admin') ? 'REPLIED' : 'PENDING';
+        
+        $stmt = $db->prepare("UPDATE inquiries SET status = ?, replied_at = NOW() WHERE id = ?");
+        $stmt->execute([$status, $inquiryId]);
+
+        $db->commit();
+        return true;
+    } catch (PDOException $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        return false;
+    }
 }
 ?>

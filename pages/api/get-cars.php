@@ -40,6 +40,7 @@ if ($countOnly) {
 require_once __DIR__ . '/../../includes/component/car-card.php';
 
 $cars = searchCars($filters, $limit, $offset);
+$favoriteIds = isLoggedIn() ? getUserFavoriteIds($_SESSION['user_id']) : [];
 
 if (empty($cars) && $page === 1) {
     echo '<div class="col-span-full py-12 text-center text-gray-500">' . __('No vehicles found matching your criteria.') . '</div>';
@@ -47,5 +48,6 @@ if (empty($cars) && $page === 1) {
 }
 
 foreach ($cars as $car):
+    $car['is_favorited'] = in_array($car['id'], $favoriteIds);
     renderCarCard($car, 'opacity-0 translate-y-10');
 endforeach;

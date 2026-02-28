@@ -16,10 +16,23 @@ class AuthMiddleware implements MiddlewareInterface
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
-            $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
-            
-            // Assuming url() helper is available from functions.php
-            header('Location: ' . url('login'));
+
+            $isJson = str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') || 
+                      str_contains($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') ||
+                      (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+            if ($isJson) {
+                header('Content-Type: application/json');
+                http_response_code(401);
+                echo json_encode([
+                    'status' => 'error',
+                    'error' => 'Authentication required',
+                    'code' => 401
+                ]);
+            } else {
+                $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+                header('Location: ' . url('login'));
+            }
             exit;
         }
 

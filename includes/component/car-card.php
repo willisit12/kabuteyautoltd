@@ -29,13 +29,54 @@ function renderCarCard($car, $extraClasses = '') {
     ?>
     <div class="car-card bg-white dark:bg-card rounded-[1.25rem] md:rounded-[1.5rem] overflow-hidden group transition-all duration-500 hover:shadow-2xl border border-border/10 <?php echo $extraClasses; ?>">
         <!-- Image Container -->
-        <div class="relative aspect-[4/3] overflow-hidden">
+        <div class="relative aspect-[4/3] overflow-hidden" 
+             x-data="{ 
+                isFavorited: <?php echo ($car['is_favorited'] ?? false) ? 'true' : 'false'; ?>,
+                isLoading: false,
+                toggleFavorite(carId) {
+                    if (!isLoggedIn) {
+                        window.dispatchEvent(new CustomEvent('open-login-modal'));
+                        return;
+                    }
+                    
+                    this.isLoading = true;
+                    fetch('<?php echo url('api/favorites'); ?>', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': window.csrfToken
+                        },
+                        body: JSON.stringify({ car_id: carId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            this.isFavorited = (data.favorite_status === 'added');
+                            window.dispatchEvent(new CustomEvent('notify', { 
+                                detail: { 
+                                    message: this.isFavorited ? 'Added to curated collection' : 'Removed from curated collection',
+                                    type: 'success'
+                                } 
+                            }));
+                        }
+                    })
+                    .catch(err => console.error('Favorite toggle error:', err))
+                    .finally(() => this.isLoading = false);
+                }
+             }">
             <img src="<?php echo $image; ?>" alt="<?php echo $name; ?>" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
             
             <!-- Buy Now Badge -->
             <div class="absolute top-0 left-0 bg-[#00c58d] text-white text-[8px] md:text-[11px] font-black px-2.5 py-1.5 md:px-4 md:py-2 rounded-br-[1rem] md:rounded-br-[1.25rem] shadow-sm uppercase tracking-tight z-10">
                 Buy Now
             </div>
+
+            <!-- Favorite Heart -->
+            <button @click.prevent="toggleFavorite(<?php echo $car['id']; ?>)" 
+                    :class="isLoading ? 'opacity-50 cursor-wait' : ''"
+                    class="absolute top-3 right-3 md:top-4 md:right-4 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-red-500 hover:scale-110 active:scale-95 transition-all z-20">
+                <i class="fa-heart" :class="isFavorited ? 'fas' : 'far text-gray-400'"></i>
+            </button>
             
             <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>

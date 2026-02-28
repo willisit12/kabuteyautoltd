@@ -1,12 +1,12 @@
 <?php
 /**
- * pages/login.php - Secure Vault Admin Entrance
+ * pages/customer/login.php - Member Vault Access
  */
-require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../../includes/functions.php';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
-    redirect(url('admin/dashboard'));
+    redirect(url('dashboard'));
 }
 
 // Handle login submission
@@ -36,14 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
-        
-        // Update last login
-        $db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?")->execute([$user['id']]);
+        loginUser($user['id']);
         
         setFlash('success', 'Access Granted. Welcome back, ' . clean($user['name']));
 
-        $default_redirect = url('admin/dashboard');
+        $default_redirect = url('dashboard');
 
         $redirect = $_SESSION['redirect_after_login'] ?? $default_redirect;
         unset($_SESSION['redirect_after_login']);
@@ -58,7 +55,7 @@ $error = getFlash('error');
 $success = getFlash('success');
 
 $pageTitle = 'Secure Vault Access';
-include_once __DIR__ . '/../includes/layout/header.php';
+include_once __DIR__ . '/../../includes/layout/header.php';
 ?>
 
 <div class="relative min-h-[80vh] flex items-center justify-center p-6 pt-32 pb-20 overflow-hidden bg-background transition-colors duration-500">
@@ -131,4 +128,4 @@ include_once __DIR__ . '/../includes/layout/header.php';
     </div>
 </div>
 
-<?php include_once __DIR__ . '/../includes/layout/footer.php'; ?>
+<?php include_once __DIR__ . '/../../includes/layout/footer.php'; ?>

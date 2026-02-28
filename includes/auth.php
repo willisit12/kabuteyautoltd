@@ -31,7 +31,7 @@ function getUserInfo() {
     
     try {
         $db = getDB();
-        $stmt = $db->prepare("SELECT id, email, name, role, avatar_url, last_login FROM users WHERE id = ?");
+        $stmt = $db->prepare("SELECT id, email, name, role, avatar_url, last_login, phone, address, created_at FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         return $stmt->fetch();
     } catch (PDOException $e) {
@@ -62,5 +62,23 @@ function logout() {
     }
     session_destroy();
     redirect(url());
+}
+
+/**
+ * Logs in a user by ID, updates last_login, and sets session
+ */
+function loginUser($userId) {
+    if (!$userId) return false;
+    
+    $_SESSION['user_id'] = $userId;
+    
+    try {
+        $db = getDB();
+        $stmt = $db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+        return $stmt->execute([$userId]);
+    } catch (PDOException $e) {
+        error_log("Failed to update last login: " . $e->getMessage());
+        return false;
+    }
 }
 ?>

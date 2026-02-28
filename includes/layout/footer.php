@@ -56,5 +56,13 @@
             </div>
         </div>
     </footer>
+
+    <?php 
+    // Only render global concierge if not already rendered by a specific page (like car-detail)
+    if (!isset($conciergeRendered)) {
+        renderChatConcierge();
+        $conciergeRendered = true;
+    }
+    ?>
 </body>
 </html>

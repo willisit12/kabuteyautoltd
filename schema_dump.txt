@@ -1,0 +1,107 @@
+--- TABLE: users ---
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `role` enum('admin','user','customer') DEFAULT 'customer',
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `phone` varchar(20) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--- TABLE: cars ---
+CREATE TABLE `cars` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `slug` varchar(255) NOT NULL,
+  `make` varchar(100) NOT NULL,
+  `model` varchar(100) NOT NULL,
+  `year` year(4) NOT NULL,
+  `price` decimal(12,2) NOT NULL,
+  `mileage` int(11) NOT NULL,
+  `vin` varchar(17) DEFAULT NULL,
+  `color` varchar(50) DEFAULT NULL,
+  `fuel_type` enum('GASOLINE','DIESEL','ELECTRIC','HYBRID','PLUGIN_HYBRID') DEFAULT NULL,
+  `transmission` enum('AUTOMATIC','MANUAL','CVT') DEFAULT NULL,
+  `body_type` enum('SEDAN','SUV','TRUCK','COUPE','HATCHBACK','VAN','CONVERTIBLE','WAGON') DEFAULT NULL,
+  `condition` enum('EXCELLENT','VERY_GOOD','GOOD','FAIR') DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `features` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`features`)),
+  `featured` tinyint(1) DEFAULT 0,
+  `walkaround_video_url` varchar(255) DEFAULT NULL,
+  `view_count` int(11) DEFAULT 0,
+  `average_rating` decimal(3,2) DEFAULT NULL,
+  `review_count` int(11) DEFAULT 0,
+  `location` varchar(100) DEFAULT NULL,
+  `status` enum('AVAILABLE','RESERVED','SOLD','ARCHIVED') DEFAULT 'AVAILABLE',
+  `sold_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `make_id` int(11) DEFAULT NULL,
+  `body_type_id` int(11) DEFAULT NULL,
+  `engine_capacity` varchar(50) DEFAULT NULL,
+  `drive_train` varchar(50) DEFAULT NULL,
+  `seats` int(11) DEFAULT NULL,
+  `doors` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`),
+  UNIQUE KEY `vin` (`vin`),
+  KEY `fk_car_make` (`make_id`),
+  KEY `fk_car_body_type` (`body_type_id`),
+  CONSTRAINT `fk_car_body_type` FOREIGN KEY (`body_type_id`) REFERENCES `body_types` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_car_make` FOREIGN KEY (`make_id`) REFERENCES `makes` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--- TABLE: orders ---
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `car_id` int(11) NOT NULL,
+  `status` enum('PENDING','PAID','SHIPPED','COMPLETED','CANCELLED') DEFAULT 'PENDING',
+  `amount` decimal(15,2) NOT NULL,
+  `payment_method` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `car_id` (`car_id`),
+  KEY `idx_orders_user` (`user_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`car_id`) REFERENCES `cars` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--- TABLE: inquiries ---
+CREATE TABLE `inquiries` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `car_id` int(11) DEFAULT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `message` text NOT NULL,
+  `status` enum('PENDING','REPLIED','ARCHIVED') DEFAULT 'PENDING',
+  `replied_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `car_id` (`car_id`),
+  KEY `idx_inquiries_user` (`user_id`),
+  CONSTRAINT `fk_inquiry_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `inquiries_ibfk_1` FOREIGN KEY (`car_id`) REFERENCES `cars` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--- TABLE: favorites ---
+CREATE TABLE `favorites` (
+  `user_id` int(11) NOT NULL,
+  `car_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`user_id`,`car_id`),
+  KEY `car_id` (`car_id`),
+  KEY `idx_favorites_user` (`user_id`),
+  CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `favorites_ibfk_2` FOREIGN KEY (`car_id`) REFERENCES `cars` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
