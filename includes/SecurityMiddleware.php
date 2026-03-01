@@ -43,7 +43,12 @@ class SecurityMiddleware implements MiddlewareInterface
 
         // 2. CSRF Validation for POST/PUT/DELETE/PATCH
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        if (in_array($method, ['POST', 'PUT', 'DELETE', 'PATCH'])) {
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+        
+        // Skip CSRF for API routes (they use API Keys)
+        $isApi = str_contains($requestUri, '/api/');
+
+        if (!$isApi && in_array($method, ['POST', 'PUT', 'DELETE', 'PATCH'])) {
             $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
             
             if (!isset($_SESSION['csrf_token']) || empty($token) || !hash_equals($_SESSION['csrf_token'], $token)) {
