@@ -15,9 +15,9 @@ function carFilter() {
             make_id: '',
             body_type_id: '',
             price_min: 0,
-            price_max: 50000,
+            price_max: 300000,
             mileage_min: 0,
-            mileage_max: 200000,
+            mileage_max: 500000,
             year_from: '',
             year_to: '',
             transmission: [],
@@ -53,10 +53,10 @@ function carFilter() {
                   this.filters[key] = [];
              } else if (key === 'price_min' || key === 'price_max') {
                   this.filters.price_min = 0;
-                  this.filters.price_max = 50000;
+                  this.filters.price_max = 300000;
              } else if (key === 'mileage_min' || key === 'mileage_max') {
                   this.filters.mileage_min = 0;
-                  this.filters.mileage_max = 200000;
+                  this.filters.mileage_max = 500000;
              } else {
                   this.filters[key] = '';
              }
@@ -94,9 +94,9 @@ function carFilter() {
                 make_id: '',
                 body_type_id: '',
                 price_min: 0,
-                price_max: 50000,
+                price_max: 300000,
                 mileage_min: 0,
-                mileage_max: 200000,
+                mileage_max: 500000,
                 year_from: '',
                 year_to: '',
                 transmission: [],
@@ -106,7 +106,7 @@ function carFilter() {
         },
 
         formatRange(min, max, unit = '') {
-            if (min == 0 && max == 50000) return 'Any';
+            if (min == 0 && (max == 300000 || max == 500000)) return 'Any';
             return `${min / 1000}${unit} ~ ${max / 1000}${unit}`;
         }
     }
@@ -329,8 +329,8 @@ function renderFilterContent($prefix = 'desktop') {
         </div>
         <div class="px-2">
              <div class="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                <input type="range" x-model="filters.price_min" min="0" max="50000" step="1000" class="absolute inset-0 w-full appearance-none bg-transparent pointer-events-none accent-gray-900 dark:accent-white slider-thumb">
-                <input type="range" x-model="filters.price_max" min="0" max="50000" step="1000" class="absolute inset-0 w-full appearance-none bg-transparent pointer-events-none accent-gray-900 dark:accent-white slider-thumb">
+                <input type="range" x-model="filters.price_min" min="0" max="300000" step="1000" class="absolute inset-0 w-full appearance-none bg-transparent pointer-events-none accent-gray-900 dark:accent-white slider-thumb">
+                <input type="range" x-model="filters.price_max" min="0" max="300000" step="1000" class="absolute inset-0 w-full appearance-none bg-transparent pointer-events-none accent-gray-900 dark:accent-white slider-thumb">
              </div>
              <div class="flex justify-between mt-4">
                 <!-- Custom Price Min Dropdown -->
@@ -355,7 +355,7 @@ function renderFilterContent($prefix = 'desktop') {
                         <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="openPMax" x-transition class="absolute z-20 top-full right-0 mt-1 w-24 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden" style="display: none;">
-                        <?php foreach ([20000=>'$20k', 30000=>'$30k', 40000=>'$40k', 50000=>'Max'] as $val => $label): ?>
+                        <?php foreach ([50000=>'$50k', 100000=>'$100k', 200000=>'$200k', 300000=>'Max'] as $val => $label): ?>
                             <button @click="filters.price_max = <?php echo $val; ?>; openPMax = false" class="block w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white">
                                 <?php echo $label; ?>
                             </button>

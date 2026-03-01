@@ -325,6 +325,26 @@ function createNotification($userId, $title, $message, $type = 'INFO', $link = n
 }
 
 /**
+ * Broadcasts a notification to all staff (admin/user)
+ */
+function notifyStaff($title, $message, $type = 'INFO', $link = null) {
+    $db = getDB();
+    try {
+        $stmt = $db->prepare("SELECT id FROM users WHERE role IN ('admin', 'user')");
+        $stmt->execute();
+        $staffMembers = $stmt->fetchAll();
+        
+        foreach ($staffMembers as $staff) {
+            createNotification($staff['id'], $title, $message, $type, $link);
+        }
+        return true;
+    } catch (PDOException $e) {
+        error_log("Failed to broadcast staff notification: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
  * Retrieves unread notification count for a user
  */
 function getUnreadNotificationsCount($userId) {
@@ -351,6 +371,36 @@ function getRecentNotifications($userId, $limit = 5) {
         return $stmt->fetchAll();
     } catch (PDOException $e) {
         return [];
+    }
+}
+
+/**
+ * Marks a specific notification as read for a user
+ */
+function markNotificationAsRead($id, $userId) {
+    if (!$id || !$userId) return false;
+    $db = getDB();
+    try {
+        $stmt = $db->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?");
+        return $stmt->execute([$id, $userId]);
+    } catch (PDOException $e) {
+        error_log("Failed to mark notification $id as read: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Deletes a specific notification for a user
+ */
+function deleteNotification($id, $userId) {
+    if (!$id || !$userId) return false;
+    $db = getDB();
+    try {
+        $stmt = $db->prepare("DELETE FROM notifications WHERE id = ? AND user_id = ?");
+        return $stmt->execute([$id, $userId]);
+    } catch (PDOException $e) {
+        error_log("Failed to delete notification $id: " . $e->getMessage());
+        return false;
     }
 }
 

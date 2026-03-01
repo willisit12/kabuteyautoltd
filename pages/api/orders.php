@@ -56,6 +56,14 @@ try {
         'customer/orders/view/' . $order_id
     );
 
+    // Notify Staff
+    notifyStaff(
+        "New Acquisition Request: #ORD-" . str_pad((string)$order_id, 5, '0', STR_PAD_LEFT),
+        "A new order has been placed by " . $user['name'] . ". Action required.",
+        'INFO',
+        'admin/orders/view.php?id=' . $order_id
+    );
+
     $db->commit();
 
     jsonResponse([

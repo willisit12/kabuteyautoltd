@@ -8,12 +8,7 @@ require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/auth.php';
 
-requireAuth();
-
-if (!isAdminRole()) {
-    setFlash('error', 'Insufficient clearance for bulk operations.');
-    redirect('import.php');
-}
+requireStaff();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect('import.php');

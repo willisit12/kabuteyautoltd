@@ -59,6 +59,24 @@ function requireAdmin() {
 }
 
 /**
+ * Verifies if the current user has an admin-level staff role (admin or user)
+ */
+function isStaffRole() {
+    $user = getUserInfo();
+    return $user && in_array($user['role'], ['admin', 'user']);
+}
+
+/**
+ * Enforces staff access — allows both 'admin' and 'user' roles
+ */
+function requireStaff() {
+    requireAuth();
+    if (!isStaffRole()) {
+        redirect(url());
+    }
+}
+
+/**
  * Destroys session and redirects to home
  */
 function logout() {

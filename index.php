@@ -71,7 +71,7 @@ $router->get('/dashboard', function($vars) {
         redirect(url('login'));
     }
     $user = getUserInfo();
-    if ($user['role'] === 'admin') {
+    if (in_array($user['role'], ['admin', 'user'])) {
         require_once __DIR__ . '/admin/dashboard.php';
     } else {
         require_once __DIR__ . '/pages/customer/dashboard.php';
@@ -89,6 +89,7 @@ $router->get('/customer/favorites', __DIR__ . '/pages/customer/favorites.php')->
 $router->get('/customer/inquiries', __DIR__ . '/pages/customer/inquiries.php')->middleware(CustomerMiddleware::class);
 $router->get('/customer/profile', __DIR__ . '/pages/customer/profile.php')->middleware(CustomerMiddleware::class);
 $router->post('/customer/profile', __DIR__ . '/pages/customer/profile.php')->middleware(CustomerMiddleware::class);
+$router->get('/customer/notifications', __DIR__ . '/pages/customer/notifications.php')->middleware(CustomerMiddleware::class);
 
 // Admin Routes (Protected)
 $router->get('/admin', __DIR__ . '/admin/dashboard.php')->middleware(AdminMiddleware::class);
@@ -106,6 +107,8 @@ $router->get('/api/get-cars', __DIR__ . '/pages/api/get-cars.php');
 $router->post('/api/convert-currency', __DIR__ . '/pages/api/convert-currency.php');
 $router->post('/api/favorites', __DIR__ . '/pages/api/favorites.php')->middleware(AuthMiddleware::class);
 $router->post('/api/orders', __DIR__ . '/pages/api/orders.php')->middleware(AuthMiddleware::class);
+$router->post('/api/notifications-api.php', __DIR__ . '/pages/api/notifications-api.php')->middleware(AuthMiddleware::class);
+$router->post('/api/chat-message', __DIR__ . '/pages/api/chat-message.php')->middleware(AuthMiddleware::class);
 
 // Dispatch
 $router->dispatch();

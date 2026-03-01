@@ -22,9 +22,8 @@ class AdminMiddleware implements MiddlewareInterface
         }
 
         $user = getUserInfo();
-        if ($user['role'] !== 'admin') {
-            // Logically, a customer trying to access admin should be sent to their dashboard or a 403
-            // Sending to /dashboard which will route them correctly
+        if (!in_array($user['role'], ['admin', 'user'])) {
+            // Customers should go to their own dashboard
             header('Location: ' . url('dashboard'));
             exit;
         }

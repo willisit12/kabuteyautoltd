@@ -399,9 +399,9 @@
                             </div>
                         </div>
 
-                        <a href="<?php echo url('dashboard'); ?>" class="glass px-6 py-2.5 rounded-full text-foreground hover:bg-accent hover:text-white transition-all font-black uppercase tracking-widest text-[9px] flex items-center gap-2 group ml-2 shadow-sm">
-                            <i class="fas fa-id-badge text-accent group-hover:text-white"></i> 
-                            Portal
+                        <a href="<?php echo url(isStaffRole() ? 'admin/dashboard' : 'dashboard'); ?>" class="glass px-6 py-2.5 rounded-full text-foreground hover:bg-accent hover:text-white transition-all font-black uppercase tracking-widest text-[9px] flex items-center gap-2 group ml-2 shadow-sm">
+                            <i class="fas <?php echo isStaffRole() ? 'fa-shield-halved' : 'fa-id-badge'; ?> text-accent group-hover:text-white"></i> 
+                            <?php echo isStaffRole() ? 'Staff Panel' : 'Portal'; ?>
                         </a>
                     <?php else: ?>
                         <div class="flex items-center gap-4 ml-2">
@@ -416,6 +416,60 @@
 
                 <!-- Mobile Trigger -->
                 <div class="md:hidden flex items-center gap-4 relative z-[101]">
+                    <?php if (isLoggedIn()): ?>
+                        <?php 
+                        $user = getUserInfo(); 
+                        $unreadCount = getUnreadNotificationsCount($user['id']);
+                        ?>
+                        <div x-data="{ nOpen: false }" class="relative">
+                            <button @click="nOpen = !nOpen" @click.away="nOpen = false" class="relative group p-2 text-foreground/60 hover:text-accent transition-all duration-300">
+                                <i class="fas fa-bell text-lg"></i>
+                                <?php if ($unreadCount > 0): ?>
+                                    <span class="absolute top-1 right-1 w-4 h-4 bg-accent text-white rounded-full flex items-center justify-center text-[8px] font-black border-2 border-background animate-bounce">
+                                        <?php echo $unreadCount; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </button>
+                            <!-- Mobile Dropdown -->
+                            <div 
+                                x-show="nOpen" 
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+                                class="fixed inset-x-4 top-24 glass rounded-[2rem] border border-border/50 shadow-2xl z-[150] overflow-hidden"
+                                x-cloak
+                            >
+                                <div class="p-6 border-b border-border/30 bg-muted/30">
+                                    <h3 class="text-[10px] font-black uppercase tracking-widest text-foreground">Intelligence Alerts</h3>
+                                </div>
+                                <div class="max-h-[60vh] overflow-y-auto divide-y divide-border/20">
+                                    <?php 
+                                    $mobNotifications = getRecentNotifications($user['id'], 5);
+                                    if (empty($mobNotifications)): 
+                                    ?>
+                                        <div class="p-10 text-center">
+                                            <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">No pending alerts</p>
+                                        </div>
+                                    <?php else: ?>
+                                        <?php foreach ($mobNotifications as $notif): ?>
+                                            <a href="<?php echo url($notif['link'] ?: 'dashboard'); ?>" class="block p-6 hover:bg-accent/[0.03] transition-all">
+                                                <div class="flex items-start gap-4">
+                                                    <div class="w-2 h-2 rounded-full mt-2 <?php echo $notif['is_read'] ? 'bg-muted' : 'bg-accent animate-pulse'; ?>"></div>
+                                                    <div class="flex-1">
+                                                        <h4 class="text-[11px] font-black text-foreground uppercase tracking-tight mb-1"><?php echo clean($notif['title']); ?></h4>
+                                                        <p class="text-[10px] font-medium text-muted-foreground leading-relaxed">"<?php echo clean($notif['message']); ?>"</p>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     <button class="text-foreground p-2 hover:text-accent transition-colors" @click="optimizedToggleMobileMenu(); mobileMenu = !mobileMenu">
                         <i class="fas fa-bars-staggered text-2xl"></i>
                     </button>
@@ -438,7 +492,7 @@
 
     <!-- Premium Mobile Sidebar -->
     <aside id="mobile-menu"
-           class="fixed top-0 left-0 h-full w-80 bg-[#0f172a] text-white flex flex-col z-[300] border-r border-white/5 shadow-2xl overflow-hidden"
+           class="fixed top-0 left-0 h-screen w-80 bg-[#0f172a] text-white flex flex-col z-[300] border-r border-white/5 shadow-2xl"
            x-cloak>
         
         <div class="p-8 pb-4 flex justify-between items-center">
@@ -476,9 +530,9 @@
                 <span class="font-bold text-sm tracking-tight"><?php echo __('nav_contact'); ?></span>
             </a>
             <?php if (isLoggedIn()): ?>
-                <a href="<?php echo url('dashboard'); ?>" class="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 border border-white/10 group">
-                    <i class="fas fa-id-badge w-5 text-accent group-hover:scale-110 transition-transform"></i>
-                    <span class="font-bold text-sm tracking-tight">Member Portal</span>
+                <a href="<?php echo url(isStaffRole() ? 'admin/dashboard' : 'dashboard'); ?>" class="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 border border-white/10 group">
+                    <i class="fas <?php echo isStaffRole() ? 'fa-shield-halved' : 'fa-id-badge'; ?> w-5 text-accent group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold text-sm tracking-tight"><?php echo isStaffRole() ? 'Staff Panel' : 'Member Portal'; ?></span>
                 </a>
             <?php else: ?>
                 <div class="grid grid-cols-2 gap-3 px-2 pt-4">
@@ -556,8 +610,8 @@
             <?php renderSocialLinks('justify-center gap-6'); ?>
             
             <?php if (isLoggedIn()): ?>
-                <a href="<?php echo url('admin/dashboard'); ?>" class="flex items-center justify-center gap-3 bg-white/5 hover:bg-accent text-white p-5 rounded-[2rem] font-black uppercase tracking-tighter transition-all shadow-xl group">
-                    <i class="fas fa-grid-2 text-accent group-hover:text-white"></i> Dashboard access
+                <a href="<?php echo url(isStaffRole() ? 'admin/dashboard' : 'dashboard'); ?>" class="flex items-center justify-center gap-3 bg-white/5 hover:bg-accent text-white p-5 rounded-[2rem] font-black uppercase tracking-tighter transition-all shadow-xl group">
+                    <i class="fas <?php echo isStaffRole() ? 'fa-shield-halved' : 'fa-grid-2'; ?> text-accent group-hover:text-white"></i> <?php echo isStaffRole() ? 'Staff Panel' : 'Dashboard access'; ?>
                 </a>
             <?php else: ?>
                 <a href="<?php echo url('login'); ?>" class="flex items-center justify-center gap-3 bg-accent text-white p-5 rounded-[2rem] font-black uppercase tracking-tighter transition-all shadow-2xl hover:scale-[1.02] active:scale-[0.98]">

@@ -8,11 +8,11 @@ require_once __DIR__ . '/../auth.php';
 requireAuth();
 require_once __DIR__ . '/../component/preloader.php';
 
-$user = getUserInfo();
-
 function renderCustomerLayout($content, $pageTitle = 'Intelligence Portal') {
-    global $user;
+    $user = getUserInfo();
     $current_uri = $_SERVER['REQUEST_URI'];
+    $unreadCount = getUnreadNotificationsCount($user['id'] ?? 0);
+    $recentNotifications = getRecentNotifications($user['id'] ?? 0, 5);
     ?>
 <!DOCTYPE html>
 <html lang="en" class="h-full">
@@ -186,11 +186,97 @@ function renderCustomerLayout($content, $pageTitle = 'Intelligence Portal') {
                 </div>
 
                 <div class="flex items-center gap-6">
-                    <!-- Notifications (Placeholder Icon) -->
-                    <button class="w-12 h-12 rounded-2xl bg-muted/50 border border-border flex items-center justify-center text-foreground hover:text-accent transition-all relative">
-                        <i class="fas fa-bell"></i>
-                        <span class="absolute top-3 right-3 w-2 h-2 bg-accent rounded-full border-2 border-background animate-pulse"></span>
-                    </button>
+                    <!-- Notifications Dropdown -->
+                    <div class="relative" x-data="{ 
+                        open: false,
+                        unreadCount: <?php echo $unreadCount; ?>,
+                        async markAsRead(id, link) {
+                            if (id) {
+                                try {
+                                    await fetch('<?php echo url('api/notifications-api.php'); ?>', {
+                                        method: 'POST',
+                                        headers: { 
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': '<?php echo generateCSRFToken(); ?>'
+                                        },
+                                        body: JSON.stringify({ action: 'mark_read', id: id })
+                                    });
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            }
+                            window.location.href = link;
+                        }
+                    }">
+                        <button @click="open = !open" @click.away="open = false" 
+                                class="w-12 h-12 rounded-2xl bg-muted/50 border border-border flex items-center justify-center text-foreground hover:text-accent transition-all relative outline-none focus:ring-2 focus:ring-accent">
+                            <i class="fas fa-bell"></i>
+                            <template x-if="unreadCount > 0">
+                                <span class="absolute top-2 right-2 flex h-3 w-3">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-accent text-[8px] font-bold text-white items-center justify-center leading-none"></span>
+                                </span>
+                            </template>
+                        </button>
+
+                        <!-- Dropdown Panel -->
+                        <div x-show="open" 
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+                             class="absolute top-16 right-0 w-80 sm:w-96 bg-background border border-border/50 rounded-3xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
+                             x-cloak>
+                            
+                            <div class="p-5 border-b border-border/30 bg-muted/30 flex justify-between items-center">
+                                <h3 class="text-xs font-black uppercase tracking-widest text-foreground">Intelligence Updates</h3>
+                            </div>
+
+                            <div class="max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                <?php if (empty($recentNotifications)): ?>
+                                    <div class="p-8 text-center text-muted-foreground">
+                                        <i class="fas fa-bell-slash text-2xl mb-3 opacity-50"></i>
+                                        <p class="text-[10px] font-bold uppercase tracking-widest">No recent alerts</p>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="flex flex-col">
+                                        <?php foreach ($recentNotifications as $notif): ?>
+                                            <button @click="markAsRead(<?php echo $notif['id']; ?>, '<?php echo url(clean($notif['link'] ?: '#')); ?>')" 
+                                                    class="text-left w-full p-5 border-b border-border/10 hover:bg-muted/50 transition-colors relative group <?php echo !$notif['is_read'] ? 'bg-accent/5' : ''; ?>">
+                                                <?php if (!$notif['is_read']): ?>
+                                                    <div class="absolute left-3 top-6 w-1.5 h-1.5 rounded-full bg-accent"></div>
+                                                <?php endif; ?>
+                                                <div class="<?php echo !$notif['is_read'] ? 'pl-4' : 'pl-1'; ?> transition-all">
+                                                    <div class="flex items-center gap-2 mb-1">
+                                                        <?php
+                                                            $icon = 'fa-info-circle text-blue-500';
+                                                            if ($notif['type'] === 'SUCCESS') $icon = 'fa-check-circle text-green-500';
+                                                            if ($notif['type'] === 'WARNING') $icon = 'fa-exclamation-triangle text-yellow-500';
+                                                            if ($notif['type'] === 'ERROR') $icon = 'fa-times-circle text-red-500';
+                                                        ?>
+                                                        <i class="fas <?php echo $icon; ?> text-[10px]"></i>
+                                                        <span class="text-[10px] font-black uppercase tracking-widest text-foreground truncate"><?php echo clean($notif['title']); ?></span>
+                                                    </div>
+                                                    <p class="text-xs font-medium text-muted-foreground leading-relaxed line-clamp-2"><?php echo clean($notif['message']); ?></p>
+                                                    <span class="text-[8px] font-black uppercase tracking-widest text-muted-foreground/60 mt-3 block">
+                                                        <?php echo date('M d, H:i', strtotime($notif['created_at'])); ?>
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="p-3 border-t border-border/30 bg-muted/10">
+                                <a href="<?php echo url('customer/notifications'); ?>" class="block w-full py-3 text-center text-[9px] font-black uppercase tracking-widest text-foreground hover:text-accent hover:bg-muted/50 rounded-xl transition-all">
+                                    View Command Center <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="flex items-center bg-muted/50 border border-border rounded-2xl p-1 gap-1">
                         <button @click="darkMode = false" :class="!darkMode ? 'bg-white text-accent shadow-sm' : 'text-muted-foreground'" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all">

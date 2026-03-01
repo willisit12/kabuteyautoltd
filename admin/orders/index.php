@@ -6,7 +6,7 @@
 require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/layout/admin-layout.php';
 
-requireAdmin();
+requireStaff();
 
 $db = getDB();
 $status_filter = $_GET['status'] ?? 'ALL';

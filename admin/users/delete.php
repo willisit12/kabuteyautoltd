@@ -3,12 +3,7 @@
  * admin/users/delete.php - Wipe User
  */
 require_once __DIR__ . '/../../includes/auth.php';
-requireAuth();
-
-if (!isAdminRole()) {
-    setFlash('error', 'Only Elite Administrators can eradicate identities.');
-    redirect('../dashboard.php');
-}
+requireAdmin();
 
 $id = intval($_GET['id'] ?? 0);
 

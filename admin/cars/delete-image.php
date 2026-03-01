@@ -3,7 +3,7 @@
  * admin/delete-image.php - Background Action
  */
 require_once __DIR__ . '/../../includes/auth.php';
-requireAuth();
+requireStaff();
 
 $imageId = intval($_GET['id'] ?? 0);
 $carId = intval($_GET['car_id'] ?? 0);

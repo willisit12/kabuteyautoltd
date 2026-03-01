@@ -6,7 +6,7 @@
 require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/layout/admin-layout.php';
 
-requireAdmin();
+requireStaff();
 
 $db   = getDB();
 $id   = intval($_GET['id'] ?? 0);
@@ -166,24 +166,48 @@ ob_start();
                 <?php endif; ?>
             </div>
 
-            <!-- Input -->
-            <div class="px-6 py-5 border-t border-border/30 bg-muted/10 flex-shrink-0">
-                <form method="POST" class="flex items-end gap-3">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+            <!-- Input (AJAX) -->
+            <div class="px-6 py-5 border-t border-border/30 bg-muted/10 flex-shrink-0"
+                 x-data="{
+                    msgText: '',
+                    sending: false,
+                    messageCount: <?php echo count($messages); ?>,
+                    async send() {
+                        if (!this.msgText.trim() || this.sending) return;
+                        this.sending = true;
+                        const text = this.msgText.trim();
+                        this.msgText = '';
+                        // Optimistic: append message immediately
+                        const container = document.getElementById('message-container');
+                        const bubble = document.createElement('div');
+                        bubble.className = 'flex justify-end gap-3';
+                        bubble.innerHTML = `<div class='max-w-[72%] flex flex-col gap-1.5 items-end'><div class='px-5 py-3.5 rounded-2xl text-sm font-medium leading-relaxed bg-foreground text-background rounded-tr-sm'>${text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}</div><span class='text-[8px] font-bold text-muted-foreground opacity-60 px-1'>You (Staff) · Just now</span></div><div class='w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-xs font-black text-accent flex-shrink-0 mt-1'><?php echo strtoupper(substr($admin['name'], 0, 1)); ?></div>`;
+                        container.appendChild(bubble);
+                        container.scrollTop = container.scrollHeight;
+                        try {
+                            await fetch('<?php echo url('api/chat-message'); ?>', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo generateCSRFToken(); ?>' },
+                                body: JSON.stringify({ inquiry_id: <?php echo $id; ?>, message: text })
+                            });
+                        } catch(e) { console.error(e); }
+                        this.sending = false;
+                    }
+                 }">
+                <div class="flex items-end gap-3">
                     <textarea
-                        name="message"
+                        x-model="msgText"
                         id="admin-msg-input"
                         placeholder="Type your reply..."
-                        required
                         rows="2"
                         class="flex-1 bg-background border border-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-accent outline-none resize-none transition-all"
-                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.submit();}"
+                        @keydown="if($event.key==='Enter' && !$event.shiftKey){ $event.preventDefault(); send(); }"
                     ></textarea>
-                    <button type="submit"
-                            class="w-12 h-12 rounded-2xl bg-accent text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all flex-shrink-0">
-                        <i class="fas fa-paper-plane text-sm"></i>
+                    <button @click="send()" :disabled="sending"
+                            class="w-12 h-12 rounded-2xl bg-accent text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all flex-shrink-0 disabled:opacity-50">
+                        <i class="fas" :class="sending ? 'fa-spinner fa-spin' : 'fa-paper-plane'" class="text-sm"></i>
                     </button>
-                </form>
+                </div>
                 <p class="text-[9px] text-muted-foreground mt-2 ml-1">Enter to send · Shift+Enter for new line</p>
             </div>
         </div>
@@ -257,54 +281,6 @@ ob_start();
 $content = ob_get_clean();
 renderAdminLayout($content, 'Chat — ' . clean($inquiry['customer_name'] ?? $inquiry['name']));
 ?>
-require_once __DIR__ . '/../../includes/functions.php';
-require_once __DIR__ . '/../../includes/layout/admin-layout.php';
-
-requireAdmin();
-
-$db = getDB();
-$id = intval($_GET['id'] ?? 0);
-
-if (!$id) redirect(url('admin/inquiries'));
-
-// Handle Message Submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['message'])) {
-    $message = clean($_POST['message']);
-    $user = getUserInfo();
-    
-    if (sendInquiryMessage($id, $user['id'], $message)) {
-        // Notify Customer
-        $stmt = $db->prepare("SELECT user_id, subject FROM inquiries WHERE id = ?");
-        $stmt->execute([$id]);
-        $inq = $stmt->fetch();
-        if ($inq && $inq['user_id']) {
-            createNotification($inq['user_id'], "Expert Reply: " . ($inq['subject'] ?: 'Vehicle Inquiry'), "The administrative team has responded to your inquiry.", 'SUCCESS', 'customer/inquiries.php?id=' . $id);
-        }
-        setFlash('success', 'Intelligence dispatched successfully.');
-    } else {
-        setFlash('error', 'Message dispatch failure.');
-    }
-    redirect(url('admin/inquiries/chat.php?id=' . $id));
-}
-
-// Fetch Inquiry Details
-$stmt = $db->prepare("
-    SELECT i.*, u.name as customer_name, u.email as customer_email, u.phone as customer_phone,
-           c.make, c.model, c.year, c.slug,
-           (SELECT url FROM car_images WHERE car_id = c.id LIMIT 1) as car_image
-    FROM inquiries i
-    LEFT JOIN users u ON i.user_id = u.id
-    LEFT JOIN cars c ON i.car_id = c.id
-    WHERE i.id = ?
-");
-$stmt->execute([$id]);
-$inquiry = $stmt->fetch();
-
-if (!$inquiry) redirect(url('admin/inquiries'));
-
-$messages = getInquiryMessages($id);
-$success = getFlash('success');
-$error = getFlash('error');
 
 ob_start();
 ?>

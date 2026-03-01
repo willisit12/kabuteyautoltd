@@ -6,7 +6,7 @@
 require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/layout/admin-layout.php';
 
-requireAdmin();
+requireStaff();
 
 $db = getDB();
 $id = intval($_GET['id'] ?? 0);

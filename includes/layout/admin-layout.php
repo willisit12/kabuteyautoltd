@@ -5,7 +5,7 @@
  */
 
 require_once __DIR__ . '/../auth.php';
-requireAuth();
+requireStaff();
 require_once __DIR__ . '/../component/preloader.php';
 
 $user = getUserInfo();
@@ -179,7 +179,7 @@ function renderAdminLayout($content, $pageTitle = 'Dashboard') {
                    'lg:w-72': !sidebarCollapsed || mobileMenu,
                    'w-72': true
                }"
-               class="fixed lg:static top-0 left-0 h-full bg-sidebar text-white flex flex-col z-[100] transition-all duration-500 ease-in-out border-r border-white/5 -translate-x-full lg:translate-x-0"
+                class="fixed lg:static top-0 left-0 h-screen lg:h-full bg-sidebar text-white flex flex-col z-[100] transition-all duration-500 ease-in-out border-r border-white/5 -translate-x-full lg:translate-x-0"
                x-cloak>
             
             <div class="p-8 pb-4 flex justify-between items-center overflow-hidden">
@@ -233,7 +233,9 @@ function renderAdminLayout($content, $pageTitle = 'Dashboard') {
                 <p x-show="!sidebarCollapsed || mobileMenu" class="text-[10px] font-black uppercase tracking-widest text-white/30 mb-4 ml-2 pt-6" x-transition.opacity>Security & Identity</p>
                 <div x-show="sidebarCollapsed && !mobileMenu" class="h-px bg-white/5 my-6" x-transition.opacity></div>
                 <?php
-                navLink('users/', 'Access Control', 'fa-users', $current_uri);
+                if ($user && $user['role'] === 'admin') {
+                    navLink('users/', 'Access Control', 'fa-users', $current_uri);
+                }
                 navLink('change-password.php', 'Vault Security', 'fa-key', $current_uri);
                 ?>
 
@@ -259,16 +261,61 @@ function renderAdminLayout($content, $pageTitle = 'Dashboard') {
             <header class="h-24 border-b border-border/50 flex items-center justify-between px-8 bg-background/80 backdrop-blur-md z-40">
                 <div class="flex items-center gap-6">
                     <button @click="mobileMenu = true" 
-                            class="lg:hidden w-12 h-12 rounded-2xl bg-muted/50 border border-border flex items-center justify-center text-foreground hover:bg-muted transition-all">
+                            class="lg:hidden w-12 h-12 rounded-2xl bg-muted/50 border border-border flex items-center justify-center text-foreground hover:bg-muted transition-all order-2">
                         <i class="fas fa-bars-staggered text-xl"></i>
                     </button>
+                    <!-- Mobile Notification Bell -->
+                    <?php 
+                    $user = getUserInfo();
+                    $unreadCount = getUnreadNotificationsCount($user['id']);
+                    ?>
+                    <div x-data="{ nOpen: false }" class="lg:hidden relative order-1">
+                        <button @click="nOpen = !nOpen" @click.away="nOpen = false" class="relative group w-12 h-12 rounded-2xl bg-muted/50 border border-border flex items-center justify-center text-foreground hover:bg-muted transition-all">
+                            <i class="fas fa-bell text-lg"></i>
+                            <?php if ($unreadCount > 0): ?>
+                                <span class="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white rounded-lg flex items-center justify-center text-[10px] font-black border-2 border-background animate-bounce shadow-lg">
+                                    <?php echo $unreadCount; ?>
+                                </span>
+                            <?php endif; ?>
+                        </button>
+                        <!-- Mobile Notification Dropdown -->
+                        <div x-show="nOpen" 
+                             class="fixed inset-x-4 top-24 glass rounded-[1.5rem] border border-border overflow-hidden z-[60] shadow-2xl"
+                             x-cloak>
+                            <div class="p-6 border-b border-border/30 bg-muted/30">
+                                <h3 class="text-[10px] font-black uppercase tracking-widest text-foreground">Intelligence Alerts</h3>
+                            </div>
+                            <div class="max-h-[60vh] overflow-y-auto divide-y divide-border/20">
+                                <?php 
+                                $mobNotifications = getRecentNotifications($user['id'], 5);
+                                if (empty($mobNotifications)): 
+                                ?>
+                                    <div class="p-10 text-center">
+                                        <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic leading-relaxed">System scan complete.<br>No peripheral alerts found.</p>
+                                    </div>
+                                <?php else: ?>
+                                    <?php foreach ($mobNotifications as $notif): ?>
+                                        <a href="<?php echo url($notif['link'] ?: 'admin/dashboard'); ?>" class="block p-5 hover:bg-accent/[0.04] transition-all">
+                                            <div class="flex items-start gap-4">
+                                                <div class="w-1.5 h-1.5 rounded-full mt-1.5 <?php echo $notif['is_read'] ? 'bg-muted-foreground' : 'bg-accent animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.5)]'; ?>"></div>
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="text-[11px] font-black text-foreground uppercase tracking-tight mb-1 truncate"><?php echo clean($notif['title']); ?></h4>
+                                                    <p class="text-[10px] font-medium text-muted-foreground leading-relaxed line-clamp-2">"<?php echo clean($notif['message']); ?>"</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
                     <div>
                         <h2 class="text-2xl font-black tracking-tighter uppercase text-foreground leading-none"><?php echo $pageTitle; ?></h2>
                         <p class="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-1 hidden sm:block">Admin Elite Console</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-6">
+                <div class="hidden lg:flex items-center gap-6">
                     <!-- Quick Theme Config -->
                     <div class="flex items-center bg-muted/50 border border-border rounded-2xl p-1 gap-1">
                         <button @click="darkMode = false" 
@@ -281,6 +328,63 @@ function renderAdminLayout($content, $pageTitle = 'Dashboard') {
                                 class="w-10 h-10 rounded-xl flex items-center justify-center transition-all">
                             <i class="fas fa-moon text-sm"></i>
                         </button>
+                    </div>
+
+                <div class="flex items-center gap-6">
+                    <?php 
+                    $unreadCount = getUnreadNotificationsCount($user['id']);
+                    $recentNotifications = getRecentNotifications($user['id'], 5);
+                    ?>
+                    <!-- Desktop Staff Notifications -->
+                    <div x-data="{ nOpen: false }" class="hidden lg:block relative">
+                        <button @click="nOpen = !nOpen" @click.away="nOpen = false" class="relative group w-12 h-12 rounded-2xl bg-muted/50 border border-border flex items-center justify-center text-foreground hover:bg-muted transition-all">
+                            <i class="fas fa-bell text-lg"></i>
+                            <?php if ($unreadCount > 0): ?>
+                                <span class="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white rounded-lg flex items-center justify-center text-[10px] font-black border-2 border-background animate-bounce shadow-lg">
+                                    <?php echo $unreadCount; ?>
+                                </span>
+                            <?php endif; ?>
+                        </button>
+
+                        <!-- Notification Dropdown -->
+                        <div 
+                            x-show="nOpen" 
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                            x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+                            class="absolute right-0 mt-4 w-80 glass rounded-[1.5rem] border border-border overflow-hidden z-[60] shadow-2xl"
+                            style="display: none;"
+                        >
+                            <div class="p-6 border-b border-border/30 bg-muted/30">
+                                <h3 class="text-[10px] font-black uppercase tracking-widest text-foreground">Staff Intelligence Alerts</h3>
+                            </div>
+                            <div class="max-h-96 overflow-y-auto divide-y divide-border/20">
+                                <?php if (empty($recentNotifications)): ?>
+                                    <div class="p-10 text-center">
+                                        <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic leading-relaxed">System scan complete.<br>No peripheral alerts found.</p>
+                                    </div>
+                                <?php else: ?>
+                                    <?php foreach ($recentNotifications as $notif): ?>
+                                        <a href="<?php echo url($notif['link'] ?: 'admin/dashboard'); ?>" class="block p-5 hover:bg-accent/[0.04] transition-all <?php echo $notif['is_read'] ? 'opacity-50' : ''; ?>">
+                                            <div class="flex items-start gap-4">
+                                                <div class="w-1.5 h-1.5 rounded-full mt-1.5 <?php echo $notif['is_read'] ? 'bg-muted-foreground' : 'bg-accent animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.5)]'; ?>"></div>
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="text-[11px] font-black text-foreground uppercase tracking-tight mb-1 truncate"><?php echo clean($notif['title']); ?></h4>
+                                                    <p class="text-[10px] font-medium text-muted-foreground leading-relaxed line-clamp-2">"<?php echo clean($notif['message']); ?>"</p>
+                                                    <span class="text-[7px] font-black uppercase text-accent/50 mt-2 block"><?php echo date('M d, H:i', strtotime($notif['created_at'])); ?></span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                            <div class="p-4 bg-muted/20 border-t border-border/30 text-center">
+                                <a href="#" class="text-[8px] font-black uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">Monitor Detailed Logs</a>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="h-8 w-[1px] bg-border/50 mx-2 hidden sm:block"></div>

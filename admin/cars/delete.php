@@ -3,7 +3,7 @@
  * admin/delete-car.php - Background Action / API Endpoint
  */
 require_once __DIR__ . '/../../includes/auth.php';
-requireAuth();
+requireStaff();
 
 header('Content-Type: application/json');
 
