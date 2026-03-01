@@ -531,8 +531,39 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 this.page++;
                 this.loading = true;
                 
+                const grid = document.getElementById('car-grid');
+                
+                // Add skeleton cards
+                const skeletonHtml = `
+                    <div class="car-card skeleton-card bg-white dark:bg-card rounded-[1.25rem] md:rounded-[1.5rem] overflow-hidden border border-border/10">
+                        <div class="relative aspect-[4/3] bg-muted animate-pulse"></div>
+                        <div class="p-3.5 md:p-5">
+                            <div class="flex items-start gap-1.5 mb-2">
+                                <div class="w-8 h-4 bg-muted rounded animate-pulse"></div>
+                                <div class="w-3/4 h-5 bg-muted rounded animate-pulse"></div>
+                            </div>
+                            <div class="w-1/2 h-3 bg-muted rounded mb-3 animate-pulse"></div>
+                            <div class="flex flex-col gap-1.5 mb-4">
+                                <div class="w-1/3 h-4 bg-muted rounded animate-pulse"></div>
+                                <div class="w-1/4 h-4 bg-muted rounded animate-pulse"></div>
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-border/10">
+                                <div class="w-1/3 h-6 bg-muted rounded animate-pulse"></div>
+                                <div class="w-7 h-7 md:w-9 md:h-9 bg-muted rounded-full animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                for (let i = 0; i < 4; i++) {
+                    grid.insertAdjacentHTML('beforeend', skeletonHtml);
+                }
+                
                 try {
                     const response = await fetch(`<?php echo url('api/get-cars'); ?>?page=${this.page}`);
+                    
+                    // Remove skeleton cards if request succeeds
+                    document.querySelectorAll('.skeleton-card').forEach(el => el.remove());
                     
                     if (response.status === 204) {
                         this.hasMore = false;
@@ -544,20 +575,22 @@ include_once __DIR__ . '/../includes/layout/header.php';
                     const doc = parser.parseFromString(html, 'text/html');
                     const newCards = Array.from(doc.querySelectorAll('.car-card'));
                     
-                    const grid = document.getElementById('car-grid');
-                    
                     newCards.forEach((card) => {
                         grid.appendChild(card);
                     });
-                    // Animate in new cards
-                    gsap.to(newCards, {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.8,
-                        stagger: 0.1,
-                        ease: "power2.out",
-                        clearProps: "all"
-                    });
+                    
+                    // Animate in new cards using fromTo
+                    gsap.fromTo(newCards, 
+                        { opacity: 0, y: 40 },
+                        {
+                            opacity: 1,
+                            y: 0,
+                            duration: 0.8,
+                            stagger: 0.1,
+                            ease: "power2.out",
+                            clearProps: "all"
+                        }
+                    );
                     
                     if (newCards.length < 8) {
                         this.hasMore = false;
@@ -566,6 +599,8 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 } catch (error) {
                     console.error('Error loading cars:', error);
                 } finally {
+                    // Ensure skeletons are removed on error as well
+                    document.querySelectorAll('.skeleton-card').forEach(el => el.remove());
                     this.loading = false;
                 }
             }

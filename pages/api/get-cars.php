@@ -49,5 +49,5 @@ if (empty($cars) && $page === 1) {
 
 foreach ($cars as $car):
     $car['is_favorited'] = in_array($car['id'], $favoriteIds);
-    renderCarCard($car, 'opacity-0 translate-y-10');
+    renderCarCard($car);
 endforeach;
