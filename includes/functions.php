@@ -39,29 +39,47 @@ function validateEmail($email) {
 }
 
 // Format price with dynamic currency conversion and localized symbols
-function formatPrice($price) {
+function formatPrice($price, $priceUnit = null) {
     if (!$price) return __('Contact for Price');
-    
-    // Convert price to current currency
+
+    // If a per-car price_unit is provided, use it directly (no conversion)
+    if ($priceUnit) {
+        $currencyCode = strtoupper(trim($priceUnit));
+        $symbols = [
+            'USD' => '$',
+            'EUR' => '€',
+            'GBP' => '£',
+            'AED' => 'AED ',
+            'CNY' => '¥',
+            'JPY' => '¥',
+        ];
+        if (!class_exists('NumberFormatter')) {
+            $symbol = $symbols[$currencyCode] ?? $currencyCode . ' ';
+            return $symbol . number_format($price, 0);
+        }
+        $formatter = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
+        return $formatter->formatCurrency($price, $currencyCode);
+    }
+
+    // Fall back to global I18n currency
     $convertedPrice = I18n::convert($price);
     $currencyCode = I18n::getCurrency();
     $locale = I18n::getLocale();
-
-    // Mapping locale to proper ISO format for NumberFormatter
     $intlLocale = ($locale === 'es') ? 'es_ES' : 'en_US';
-    
-    // Fallback if intl extension (NumberFormatter) is not enabled
+
     if (!class_exists('NumberFormatter')) {
         $symbols = [
             'USD' => '$',
             'EUR' => '€',
             'GBP' => '£',
-            'AED' => 'AED '
+            'AED' => 'AED ',
+            'CNY' => '¥',
+            'JPY' => '¥',
         ];
         $symbol = $symbols[$currencyCode] ?? $currencyCode . ' ';
         return $symbol . number_format($convertedPrice, 0);
     }
-    
+
     $formatter = new NumberFormatter($intlLocale, NumberFormatter::CURRENCY);
     return $formatter->formatCurrency($convertedPrice, $currencyCode);
 }

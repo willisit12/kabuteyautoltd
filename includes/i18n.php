@@ -113,6 +113,37 @@ class I18n {
     public static function getLocale() {
         return self::$currentLocale;
     }
+
+    /**
+     * Build a URL that preserves all current query params but swaps one param.
+     * Used by language and currency dropdowns to stay on the current page.
+     */
+    public static function switchUrl($param, $value) {
+        $query = $_GET;
+        $query[$param] = $value;
+        $base = strtok($_SERVER['REQUEST_URI'], '?');
+        return htmlspecialchars($base . '?' . http_build_query($query), ENT_QUOTES, 'UTF-8');
+    }
+
+    /**
+     * Returns a JSON-encoded object of translation keys needed by Alpine.js components.
+     * Output as window.i18n in the page <head>.
+     */
+    public static function jsTranslations() {
+        $keys = [
+            'added_to_favorites',
+            'removed_from_favorites',
+            'place_order_confirm',
+            'network_error',
+            'order_success',
+            'could_not_place_order',
+        ];
+        $out = [];
+        foreach ($keys as $k) {
+            $out[$k] = self::translate($k);
+        }
+        return json_encode($out, JSON_UNESCAPED_UNICODE);
+    }
 }
 
 // Global helper functions

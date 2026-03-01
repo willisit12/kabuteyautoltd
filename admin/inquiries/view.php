@@ -1,11 +1,31 @@
 <?php
 /**
- * admin/inquiries/view.php - View & Modify Inquiry
+ * admin/inquiries/view.php - Redirect to chat
  */
+require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/layout/admin-layout.php';
 
+requireAdmin();
+
 $id = intval($_GET['id'] ?? 0);
-if (!$id) redirect('index.php');
+if (!$id) redirect(url('admin/inquiries'));
+
+$db = getDB();
+
+// Handle status update POST (from chat page archive button)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        setFlash('error', 'Security validation failed.');
+        redirect(url('admin/inquiries/chat.php?id=' . $id));
+    }
+    $status = clean($_POST['status'] ?? 'PENDING');
+    $stmt = $db->prepare("UPDATE inquiries SET status = ?, replied_at = IF(? = 'REPLIED', NOW(), replied_at) WHERE id = ?");
+    $stmt->execute([$status, $status, $id]);
+    redirect(url('admin/inquiries/chat.php?id=' . $id));
+}
+
+// Otherwise redirect to chat
+redirect(url('admin/inquiries/chat.php?id=' . $id));
 
 $db = getDB();
 
@@ -36,9 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Fetch details
 $stmt = $db->prepare("
-    SELECT i.*, c.make, c.model, c.year, c.price 
-    FROM inquiries i 
-    LEFT JOIN cars c ON i.car_id = c.id 
+    SELECT i.*, c.make, c.model, c.year, c.price, c.price_unit
+    FROM inquiries i
+    LEFT JOIN cars c ON i.car_id = c.id
     WHERE i.id = ?
 ");
 $stmt->execute([$id]);
@@ -143,7 +163,7 @@ ob_start();
                     <div class="bg-muted/50 p-5 rounded-2xl border border-border group-hover:border-accent group-hover:shadow-lg transition-all">
                         <p class="text-[10px] font-black text-accent uppercase tracking-widest mb-1"><?php echo $inquiry['year']; ?> <?php echo clean($inquiry['make']); ?></p>
                         <p class="text-lg font-black text-foreground tracking-tight leading-none mb-3"><?php echo clean($inquiry['model']); ?></p>
-                        <p class="text-sm font-bold text-foreground tabular-nums"><?php echo formatPrice($inquiry['price']); ?></p>
+                        <p class="text-sm font-bold text-foreground tabular-nums"><?php echo formatPrice($inquiry['price'], $inquiry['price_unit'] ?? null); ?></p>
                     </div>
                 </a>
             </div>

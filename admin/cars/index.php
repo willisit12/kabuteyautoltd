@@ -214,7 +214,7 @@ ob_start();
                         </div>
                     </td>
                     <td class="px-8 py-6">
-                        <div class="font-black text-foreground tabular-nums text-base"><?php echo formatPrice($car['price']); ?></div>
+                        <div class="font-black text-foreground tabular-nums text-base"><?php echo formatPrice($car['price'], $car['price_unit'] ?? null); ?></div>
                         <div class="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1"><?php echo formatMileage($car['mileage']); ?></div>
                     </td>
                     <td class="px-8 py-6">

@@ -10,7 +10,8 @@ if (!isAdminRole()) {
 }
 
 $success = getFlash('success');
-$error = getFlash('error');
+$error   = getFlash('error');
+$results = getFlash('import_results');
 
 ob_start();
 ?>
@@ -29,15 +30,61 @@ ob_start();
 
     <?php if ($success): ?>
         <div class="bg-green-500/10 border border-green-500/20 text-green-500 p-6 rounded-[2rem] mb-8 flex items-center gap-4 text-sm font-bold">
-            <i class="fas fa-check-circle text-xl"></i>
+            <i class="fas fa-check-circle text-xl flex-shrink-0"></i>
             <?php echo $success; ?>
         </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
         <div class="bg-red-500/10 border border-red-500/20 text-red-500 p-6 rounded-[2rem] mb-8 flex items-center gap-4 text-sm font-bold">
-            <i class="fas fa-exclamation-triangle text-xl"></i>
+            <i class="fas fa-exclamation-triangle text-xl flex-shrink-0"></i>
             <?php echo $error; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($results): ?>
+        <?php $r = json_decode($results, true); ?>
+        <div class="glass p-8 rounded-[2.5rem] border border-border/50 mb-10">
+            <h3 class="text-sm font-black text-foreground uppercase tracking-widest mb-6 flex items-center gap-3">
+                <i class="fas fa-chart-bar text-accent"></i> Import Report
+            </h3>
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 text-center">
+                    <p class="text-2xl font-black text-green-500"><?php echo $r['imported'] ?? 0; ?></p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">Imported</p>
+                </div>
+                <div class="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 text-center">
+                    <p class="text-2xl font-black text-blue-500"><?php echo $r['skipped'] ?? 0; ?></p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">Skipped</p>
+                </div>
+                <div class="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center">
+                    <p class="text-2xl font-black text-red-500"><?php echo count($r['errors'] ?? []); ?></p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">Errors</p>
+                </div>
+            </div>
+            <?php if (!empty($r['errors'])): ?>
+                <div class="bg-red-500/5 border border-red-500/20 rounded-2xl p-4">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-red-500 mb-3">Error Details</p>
+                    <ul class="space-y-1">
+                        <?php foreach ($r['errors'] as $err): ?>
+                            <li class="text-[10px] font-bold text-muted-foreground flex items-start gap-2">
+                                <i class="fas fa-times-circle text-red-500 mt-0.5 flex-shrink-0"></i>
+                                <?php echo htmlspecialchars($err); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+            <?php if (!empty($r['log'])): ?>
+                <details class="mt-4">
+                    <summary class="text-[9px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground transition-colors">Show full log (<?php echo count($r['log']); ?> entries)</summary>
+                    <div class="mt-3 bg-muted/30 rounded-2xl p-4 max-h-48 overflow-y-auto custom-scrollbar">
+                        <?php foreach ($r['log'] as $entry): ?>
+                            <p class="text-[10px] font-mono text-muted-foreground leading-relaxed"><?php echo htmlspecialchars($entry); ?></p>
+                        <?php endforeach; ?>
+                    </div>
+                </details>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 
@@ -52,39 +99,49 @@ ob_start();
             Import Protocol
         </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-muted/30 p-6 rounded-2xl border border-border/50">
                 <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center text-accent mb-4">
-                    <i class="fas fa-file-csv text-xl"></i>
+                    <i class="fas fa-spider text-xl"></i>
                 </div>
-                <h3 class="text-xs font-black text-foreground uppercase tracking-widest mb-2">Step 1</h3>
-                <p class="text-[10px] font-bold text-muted-foreground leading-relaxed">Download the CSV template and fill in vehicle details. Each row = one car.</p>
+                <h3 class="text-xs font-black text-foreground uppercase tracking-widest mb-2">Step 1 — Scrape</h3>
+                <p class="text-[10px] font-bold text-muted-foreground leading-relaxed">Run the scraper. Each car produces a folder with <code class="text-accent">data.json</code> and an <code class="text-accent">images/</code> subfolder.</p>
             </div>
             <div class="bg-muted/30 p-6 rounded-2xl border border-border/50">
                 <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500 mb-4">
-                    <i class="fas fa-images text-xl"></i>
+                    <i class="fas fa-file-archive text-xl"></i>
                 </div>
-                <h3 class="text-xs font-black text-foreground uppercase tracking-widest mb-2">Step 2</h3>
-                <p class="text-[10px] font-bold text-muted-foreground leading-relaxed">Organize images in folders matching the <code class="text-accent">image_folder</code> column in CSV, then zip them.</p>
+                <h3 class="text-xs font-black text-foreground uppercase tracking-widest mb-2">Step 2 — Zip</h3>
+                <p class="text-[10px] font-bold text-muted-foreground leading-relaxed">Compress all car folders into a single <code class="text-accent">cars.zip</code>. The ZIP root must contain the car folders directly.</p>
             </div>
             <div class="bg-muted/30 p-6 rounded-2xl border border-border/50">
                 <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center text-green-500 mb-4">
                     <i class="fas fa-upload text-xl"></i>
                 </div>
-                <h3 class="text-xs font-black text-foreground uppercase tracking-widest mb-2">Step 3</h3>
-                <p class="text-[10px] font-bold text-muted-foreground leading-relaxed">Upload both files below. The system will automatically process and catalog everything.</p>
+                <h3 class="text-xs font-black text-foreground uppercase tracking-widest mb-2">Step 3 — Upload</h3>
+                <p class="text-[10px] font-bold text-muted-foreground leading-relaxed">Upload the ZIP below. The system will parse each <code class="text-accent">data.json</code>, import images, and skip duplicates automatically.</p>
             </div>
         </div>
 
-        <a href="<?php echo url('config/car-import-template.csv'); ?>" download
-           class="inline-flex items-center gap-3 px-6 py-3 bg-accent/10 text-accent rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-accent hover:text-white transition-all border border-accent/20">
-            <i class="fas fa-download"></i>
-            Download CSV Template
-        </a>
+        <!-- ZIP structure diagram -->
+        <div class="bg-muted/20 border border-border/50 rounded-2xl p-5 font-mono text-[10px] text-muted-foreground leading-relaxed">
+            <p class="text-accent font-black mb-2">Expected ZIP structure:</p>
+            <p>cars.zip</p>
+            <p class="ml-4">├── audi-q3-2022/</p>
+            <p class="ml-8">│   ├── data.json</p>
+            <p class="ml-8">│   └── images/</p>
+            <p class="ml-12">│       ├── 01.jpg</p>
+            <p class="ml-12">│       └── 02.jpg ...</p>
+            <p class="ml-4">├── bmw-x3-2023/</p>
+            <p class="ml-8">│   ├── data.json</p>
+            <p class="ml-8">│   └── images/ ...</p>
+        </div>
     </div>
 
     <!-- Upload Form -->
-    <form method="POST" action="import-process.php" enctype="multipart/form-data" class="glass p-10 rounded-[3rem] border border-border/50 shadow-xl relative overflow-hidden">
+    <form method="POST" action="import-process.php" enctype="multipart/form-data"
+          class="glass p-10 rounded-[3rem] border border-border/50 shadow-xl relative overflow-hidden"
+          id="import-form">
         <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
 
         <h2 class="text-lg font-black text-foreground tracking-tighter uppercase mb-8 flex items-center gap-3">
@@ -92,112 +149,82 @@ ob_start();
             Upload Station
         </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-            <!-- CSV Upload -->
-            <div class="space-y-3">
-                <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                    <i class="fas fa-file-csv text-accent mr-2"></i>Vehicle Data File (.csv)
-                </label>
-                <div class="relative">
-                    <div id="csv-drop" class="border-2 border-dashed border-border rounded-2xl p-10 text-center cursor-pointer hover:border-accent hover:bg-accent/5 transition-all group">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-muted-foreground/30 group-hover:text-accent transition-colors mb-4 block"></i>
-                        <p id="csv-label" class="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors">
-                            Drag & drop CSV here or <span class="text-accent underline">browse</span>
-                        </p>
-                        <p class="text-[9px] font-bold text-muted-foreground/50 mt-2 uppercase tracking-widest">Accepts .csv files only</p>
-                    </div>
-                    <input type="file" name="csv_file" id="csv-input" accept=".csv" required class="absolute inset-0 opacity-0 cursor-pointer">
+        <!-- ZIP Upload -->
+        <div class="space-y-3 mb-10">
+            <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <i class="fas fa-file-archive text-accent mr-2"></i>Scraped Cars Archive (.zip)
+            </label>
+            <div class="relative">
+                <div id="zip-drop" class="border-2 border-dashed border-border rounded-2xl p-16 text-center cursor-pointer hover:border-accent hover:bg-accent/5 transition-all group">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-muted-foreground/30 group-hover:text-accent transition-colors mb-4 block"></i>
+                    <p id="zip-label" class="text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors">
+                        Drag & drop <span class="text-accent">cars.zip</span> here or <span class="text-accent underline">browse</span>
+                    </p>
+                    <p class="text-[9px] font-bold text-muted-foreground/50 mt-2 uppercase tracking-widest">Accepts .zip — max <?php echo ini_get('upload_max_filesize'); ?></p>
                 </div>
+                <input type="file" name="zip_file" id="zip-input" accept=".zip" required
+                       class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
             </div>
-
-            <!-- ZIP Upload -->
-            <div class="space-y-3">
-                <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                    <i class="fas fa-file-archive text-blue-500 mr-2"></i>Image Archive (.zip) <span class="text-muted-foreground/50">— optional</span>
-                </label>
-                <div class="relative">
-                    <div id="zip-drop" class="border-2 border-dashed border-border rounded-2xl p-10 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-500/5 transition-all group">
-                        <i class="fas fa-images text-3xl text-muted-foreground/30 group-hover:text-blue-500 transition-colors mb-4 block"></i>
-                        <p id="zip-label" class="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors">
-                            Drag & drop ZIP here or <span class="text-blue-500 underline">browse</span>
-                        </p>
-                        <p class="text-[9px] font-bold text-muted-foreground/50 mt-2 uppercase tracking-widest">Accepts .zip up to 200MB</p>
-                    </div>
-                    <input type="file" name="zip_file" id="zip-input" accept=".zip" class="absolute inset-0 opacity-0 cursor-pointer">
-                </div>
-            </div>
+            <!-- File size preview -->
+            <p id="file-info" class="text-[10px] font-bold text-muted-foreground ml-1 hidden"></p>
         </div>
 
         <button type="submit" id="submit-btn"
                 class="w-full bg-accent text-white py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.03] active:scale-[0.98] transition-all shadow-[0_15px_40px_rgba(249,115,22,0.4)] relative group overflow-hidden">
-            <span class="relative z-10 flex items-center justify-center gap-3">
+            <span class="relative z-10 flex items-center justify-center gap-3" id="btn-label">
                 <i class="fas fa-rocket"></i>
                 Initiate Bulk Import
             </span>
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
         </button>
-    </form>
 
-    <!-- CSV Spec Reference -->
-    <div class="mt-10 glass p-8 rounded-[2.5rem] border border-border/50">
-        <h3 class="text-[10px] font-black text-foreground tracking-widest uppercase mb-6 flex items-center gap-2">
-            <i class="fas fa-info-circle text-accent"></i>
-            CSV Column Reference
-        </h3>
-        <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left text-xs">
-                <thead>
-                    <tr class="border-b border-border/50">
-                        <th class="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-accent">Column</th>
-                        <th class="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-muted-foreground">Required</th>
-                        <th class="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-muted-foreground">Accepted Values</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-border/20 text-muted-foreground font-bold">
-                    <tr><td class="py-3 px-4 text-foreground">make</td><td class="py-3 px-4 text-green-500">Yes</td><td class="py-3 px-4">e.g. Honda, Toyota, Ford</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">model</td><td class="py-3 px-4 text-green-500">Yes</td><td class="py-3 px-4">e.g. Civic, Camry, F-150</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">year</td><td class="py-3 px-4 text-green-500">Yes</td><td class="py-3 px-4">4-digit year (2020, 2024)</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">price</td><td class="py-3 px-4 text-green-500">Yes</td><td class="py-3 px-4">Numeric, no $ (24500)</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">mileage</td><td class="py-3 px-4 text-green-500">Yes</td><td class="py-3 px-4">Numeric (15000)</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">vin</td><td class="py-3 px-4 text-amber-500">Optional</td><td class="py-3 px-4">17-character VIN</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">color</td><td class="py-3 px-4 text-amber-500">Optional</td><td class="py-3 px-4">Any color name</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">fuel_type</td><td class="py-3 px-4 text-amber-500">Optional</td><td class="py-3 px-4">GASOLINE, DIESEL, ELECTRIC, HYBRID, PLUGIN_HYBRID</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">transmission</td><td class="py-3 px-4 text-amber-500">Optional</td><td class="py-3 px-4">AUTOMATIC, MANUAL, CVT</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">body_type</td><td class="py-3 px-4 text-amber-500">Optional</td><td class="py-3 px-4">SEDAN, SUV, TRUCK, COUPE, HATCHBACK, VAN, CONVERTIBLE, WAGON</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">condition</td><td class="py-3 px-4 text-amber-500">Optional</td><td class="py-3 px-4">EXCELLENT, VERY_GOOD, GOOD, FAIR</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">description</td><td class="py-3 px-4 text-amber-500">Optional</td><td class="py-3 px-4">Free text</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">features</td><td class="py-3 px-4 text-amber-500">Optional</td><td class="py-3 px-4">Comma-separated list</td></tr>
-                    <tr><td class="py-3 px-4 text-foreground">image_folder</td><td class="py-3 px-4 text-amber-500">Optional</td><td class="py-3 px-4">Folder name inside ZIP matching this car's images</td></tr>
-                </tbody>
-            </table>
+        <!-- Progress indicator (shown after submit) -->
+        <div id="progress-wrap" class="hidden mt-8">
+            <div class="flex items-center gap-4 mb-3">
+                <i class="fas fa-spinner fa-spin text-accent text-xl"></i>
+                <p class="text-sm font-black text-foreground">Processing import — do not close this page...</p>
+            </div>
+            <div class="w-full bg-muted rounded-full h-2">
+                <div class="bg-accent h-2 rounded-full animate-pulse" style="width: 100%"></div>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 
 <script>
-    // Drag & Drop file label updates
-    function setupDrop(inputId, labelId, dropId) {
-        const input = document.getElementById(inputId);
-        const label = document.getElementById(labelId);
-        const drop = document.getElementById(dropId);
+    const zipInput  = document.getElementById('zip-input');
+    const zipLabel  = document.getElementById('zip-label');
+    const zipDrop   = document.getElementById('zip-drop');
+    const fileInfo  = document.getElementById('file-info');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnLabel  = document.getElementById('btn-label');
+    const progressWrap = document.getElementById('progress-wrap');
 
-        input.addEventListener('change', () => {
-            if (input.files.length > 0) {
-                label.textContent = input.files[0].name;
-                drop.classList.add('border-accent', 'bg-accent/5');
-                drop.classList.remove('border-border');
-            }
-        });
-    }
-    setupDrop('csv-input', 'csv-label', 'csv-drop');
-    setupDrop('zip-input', 'zip-label', 'zip-drop');
+    zipInput.addEventListener('change', () => {
+        if (zipInput.files.length > 0) {
+            const file = zipInput.files[0];
+            const mb   = (file.size / 1024 / 1024).toFixed(1);
+            zipLabel.innerHTML = `<span class="text-accent font-black">${file.name}</span> selected`;
+            zipDrop.classList.add('border-accent', 'bg-accent/5');
+            zipDrop.classList.remove('border-border');
+            fileInfo.textContent = `File size: ${mb} MB`;
+            fileInfo.classList.remove('hidden');
+        }
+    });
 
-    // Show loading state on submit
-    document.querySelector('form').addEventListener('submit', function() {
-        const btn = document.getElementById('submit-btn');
-        btn.innerHTML = '<span class="relative z-10 flex items-center justify-center gap-3"><i class="fas fa-spinner fa-spin"></i> Processing Import...</span>';
-        btn.disabled = true;
-        btn.classList.add('opacity-70', 'cursor-wait');
+    // Drag & drop
+    zipDrop.addEventListener('dragover',  e => { e.preventDefault(); zipDrop.classList.add('border-accent','bg-accent/5'); });
+    zipDrop.addEventListener('dragleave', () => { if (!zipInput.files.length) zipDrop.classList.remove('border-accent','bg-accent/5'); });
+    zipDrop.addEventListener('drop', e => {
+        e.preventDefault();
+        zipInput.files = e.dataTransfer.files;
+        zipInput.dispatchEvent(new Event('change'));
+    });
+
+    document.getElementById('import-form').addEventListener('submit', function() {
+        btnLabel.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-70', 'cursor-wait');
+        progressWrap.classList.remove('hidden');
     });
 </script>
 

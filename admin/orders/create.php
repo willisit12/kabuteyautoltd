@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $payment_method = clean($_POST['payment_method'] ?? 'Administrative Settlement');
     
     // Fetch car for price and status check
-    $stmt = $db->prepare("SELECT price, status FROM cars WHERE id = ?");
+    $stmt = $db->prepare("SELECT price, price_unit, status FROM cars WHERE id = ?");
     $stmt->execute([$car_id]);
     $car = $stmt->fetch();
     
@@ -27,19 +27,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             $db->beginTransaction();
-            
-            $stmt = $db->prepare("INSERT INTO orders (user_id, car_id, amount, status, payment_method) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$user_id, $car_id, $car['price'], $status, $payment_method]);
+
+            $stmt = $db->prepare("INSERT INTO orders (user_id, car_id, amount, price_unit, status, payment_method, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
+            $stmt->execute([$user_id, $car_id, $car['price'], $car['price_unit'], $status, $payment_method]);
             $order_id = $db->lastInsertId();
-            
+
             // Update car status
             $stmt = $db->prepare("UPDATE cars SET status = 'RESERVED' WHERE id = ?");
             $stmt->execute([$car_id]);
-            
+
             $db->commit();
-            
-            createNotification($user_id, "Order Initialized: #ORD-" . str_pad((string)$order_id, 5, '0', STR_PAD_LEFT), "An administrative order has been initiated for you. Acquisition status: " . $status, 'SUCCESS', 'dashboard');
-            
+
+            createNotification($user_id, "Order Initialized: #ORD-" . str_pad((string)$order_id, 5, '0', STR_PAD_LEFT), "An administrative order has been initiated for you. Acquisition status: " . $status, 'SUCCESS', 'customer/orders/view/' . $order_id);
+
             setFlash('success', 'Acquisition protocol initialized manually.');
             redirect(url('admin/orders/view.php?id=' . $order_id));
         } catch (Exception $e) {
@@ -54,7 +54,7 @@ $stmt = $db->query("SELECT id, name, email FROM users WHERE role = 'customer' OR
 $customers = $stmt->fetchAll();
 
 // Fetch Available Cars
-$stmt = $db->query("SELECT id, make, model, year, price FROM cars WHERE status = 'AVAILABLE' ORDER BY make, model ASC");
+$stmt = $db->query("SELECT id, make, model, year, price, price_unit FROM cars WHERE status = 'AVAILABLE' ORDER BY make, model ASC");
 $availableCars = $stmt->fetchAll();
 
 $error = getFlash('error');
@@ -102,7 +102,7 @@ ob_start();
                     <select name="car_id" required class="w-full bg-background/50 border border-border text-foreground px-6 py-5 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none appearance-none">
                         <option value="">Choose Available Asset...</option>
                         <?php foreach ($availableCars as $car): ?>
-                            <option value="<?php echo $car['id']; ?>"><?php echo $car['year'] . ' ' . $car['make'] . ' ' . $car['model']; ?> - <?php echo formatPrice($car['price']); ?></option>
+                            <option value="<?php echo $car['id']; ?>"><?php echo $car['year'] . ' ' . $car['make'] . ' ' . $car['model']; ?> - <?php echo formatPrice($car['price'], $car['price_unit'] ?? null); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>

@@ -26,17 +26,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'model' => clean($_POST['model'] ?? ''),
         'year' => intval($_POST['year'] ?? 0),
         'price' => floatval($_POST['price'] ?? 0),
+        'price_unit' => clean($_POST['price_unit'] ?? '') ?: null,
         'mileage' => intval($_POST['mileage'] ?? 0),
-        'vin' => clean($_POST['vin'] ?? null),
+        'vin' => clean($_POST['vin'] ?? null) ?: null,
         'color' => clean($_POST['color'] ?? ''),
         'fuel_type' => $_POST['fuel_type'] ?? 'GASOLINE',
         'transmission' => $_POST['transmission'] ?? 'AUTOMATIC',
         'body_type' => $_POST['body_type'] ?? 'SEDAN',
         'condition' => $_POST['condition'] ?? 'EXCELLENT',
+        'trim' => clean($_POST['trim'] ?? '') ?: null,
+        'engine_capacity' => clean($_POST['engine_capacity'] ?? '') ?: null,
+        'drive_train' => clean($_POST['drive_train'] ?? '') ?: null,
+        'seats' => intval($_POST['seats'] ?? 0) ?: null,
+        'doors' => intval($_POST['doors'] ?? 0) ?: null,
+        'emission' => clean($_POST['emission'] ?? '') ?: null,
+        'finance_info' => clean($_POST['finance_info'] ?? '') ?: null,
         'description' => clean($_POST['description'] ?? ''),
         'features' => json_encode(array_filter(array_map('trim', explode(',', $_POST['features'] ?? '')))),
         'featured' => isset($_POST['featured']) ? 1 : 0,
-        'walkaround_video_url' => clean($_POST['walkaround_video_url'] ?? ''),
+        'walkaround_video_url' => clean($_POST['walkaround_video_url'] ?? '') ?: null,
         'location' => clean($_POST['location'] ?? 'Toronto, ON'),
         'status' => clean($_POST['status'] ?? 'AVAILABLE'),
         'id' => $id
@@ -48,24 +56,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $db = getDB();
-    $stmt = $db->prepare("UPDATE cars SET 
-                         make = :make, 
-                         model = :model, 
-                         year = :year, 
-                         price = :price, 
-                         mileage = :mileage, 
+    $stmt = $db->prepare("UPDATE cars SET
+                         make = :make,
+                         model = :model,
+                         year = :year,
+                         price = :price,
+                         price_unit = :price_unit,
+                         mileage = :mileage,
                          vin = :vin,
                          color = :color,
-                         fuel_type = :fuel_type, 
-                         transmission = :transmission, 
+                         fuel_type = :fuel_type,
+                         transmission = :transmission,
                          body_type = :body_type,
                          `condition` = :condition,
-                         description = :description, 
+                         trim = :trim,
+                         engine_capacity = :engine_capacity,
+                         drive_train = :drive_train,
+                         seats = :seats,
+                         doors = :doors,
+                         emission = :emission,
+                         finance_info = :finance_info,
+                         description = :description,
                          features = :features,
-                         featured = :featured, 
+                         featured = :featured,
                          walkaround_video_url = :walkaround_video_url,
                          location = :location,
-                         status = :status 
+                         status = :status
                          WHERE id = :id");
     $stmt->execute($data);
 
@@ -167,6 +183,18 @@ ob_start();
                                class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
                     </div>
                     <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Price Currency</label>
+                        <select name="price_unit" class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold appearance-none outline-none">
+                            <option value="" <?php echo empty($car['price_unit']) ? 'selected' : ''; ?>>Default (USD)</option>
+                            <option value="USD" <?php echo ($car['price_unit'] ?? '') === 'USD' ? 'selected' : ''; ?>>USD ($)</option>
+                            <option value="EUR" <?php echo ($car['price_unit'] ?? '') === 'EUR' ? 'selected' : ''; ?>>EUR (€)</option>
+                            <option value="GBP" <?php echo ($car['price_unit'] ?? '') === 'GBP' ? 'selected' : ''; ?>>GBP (£)</option>
+                            <option value="AED" <?php echo ($car['price_unit'] ?? '') === 'AED' ? 'selected' : ''; ?>>AED</option>
+                            <option value="CNY" <?php echo ($car['price_unit'] ?? '') === 'CNY' ? 'selected' : ''; ?>>CNY (¥)</option>
+                            <option value="JPY" <?php echo ($car['price_unit'] ?? '') === 'JPY' ? 'selected' : ''; ?>>JPY (¥)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-3">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Distance Travelled (Miles)</label>
                         <input type="number" name="mileage" required value="<?php echo intval($car['mileage']); ?>"
                                class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
@@ -174,6 +202,41 @@ ob_start();
                     <div class="space-y-3">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Exterior Shade (Color)</label>
                         <input type="text" name="color" value="<?php echo clean($car['color'] ?? ''); ?>" placeholder="e.g. Guards Red"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Trim Level</label>
+                        <input type="text" name="trim" value="<?php echo clean($car['trim'] ?? ''); ?>" placeholder="e.g. Sport, Premium, GT"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Engine Capacity</label>
+                        <input type="text" name="engine_capacity" value="<?php echo clean($car['engine_capacity'] ?? ''); ?>" placeholder="e.g. 3.0L V6, 2000cc"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Drive Train</label>
+                        <select name="drive_train" class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold appearance-none outline-none">
+                            <option value="" <?php echo empty($car['drive_train']) ? 'selected' : ''; ?>>Select Drive Train</option>
+                            <option value="FWD" <?php echo ($car['drive_train'] ?? '') === 'FWD' ? 'selected' : ''; ?>>Front-Wheel Drive (FWD)</option>
+                            <option value="RWD" <?php echo ($car['drive_train'] ?? '') === 'RWD' ? 'selected' : ''; ?>>Rear-Wheel Drive (RWD)</option>
+                            <option value="AWD" <?php echo ($car['drive_train'] ?? '') === 'AWD' ? 'selected' : ''; ?>>All-Wheel Drive (AWD)</option>
+                            <option value="4WD" <?php echo ($car['drive_train'] ?? '') === '4WD' ? 'selected' : ''; ?>>Four-Wheel Drive (4WD)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Seating Capacity</label>
+                        <input type="number" name="seats" min="1" max="20" value="<?php echo intval($car['seats'] ?? 0) ?: ''; ?>" placeholder="e.g. 5"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Number of Doors</label>
+                        <input type="number" name="doors" min="2" max="6" value="<?php echo intval($car['doors'] ?? 0) ?: ''; ?>" placeholder="e.g. 4"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Emission Standard</label>
+                        <input type="text" name="emission" value="<?php echo clean($car['emission'] ?? ''); ?>" placeholder="e.g. Euro 6, CARB"
                                class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
                     </div>
                     <div class="space-y-3">
@@ -246,6 +309,12 @@ ob_start();
                 </div>
 
                 <div class="mt-10 space-y-3">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Finance Information</label>
+                    <input type="text" name="finance_info" value="<?php echo clean($car['finance_info'] ?? ''); ?>" placeholder="e.g. Financing available from $X/month"
+                           class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                </div>
+
+                <div class="mt-8 space-y-3">
                     <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Narrative (Description)</label>
                     <textarea name="description" rows="5" class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-3xl focus:ring-2 focus:ring-accent focus:border-accent transition font-medium italic outline-none"><?php echo clean($car['description']); ?></textarea>
                 </div>
@@ -372,10 +441,10 @@ ob_start();
                 
                 if (typeof gsap !== 'undefined') {
                     gsap.from(div, {
-                        scale: 0.8,
+                        scale: 0.9,
                         opacity: 0,
-                        duration: 0.5,
-                        ease: "back.out(1.7)"
+                        duration: 0.4,
+                        ease: "power2.out"
                     });
                 }
             };

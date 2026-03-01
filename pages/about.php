@@ -134,13 +134,13 @@ include_once __DIR__ . '/../includes/layout/header.php';
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const tl = gsap.timeline({ defaults: { ease: "power4.out" }});
-        
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" }});
+
         tl.from(".reveal-section", {
-            y: 40,
+            y: 30,
             opacity: 0,
-            duration: 1.2,
-            stagger: 0.2,
+            duration: 0.8,
+            stagger: 0.15,
             clearProps: "all"
         });
     });

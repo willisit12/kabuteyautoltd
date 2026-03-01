@@ -12,7 +12,7 @@ $db = getDB();
 
 // Fetch all orders for this user
 $stmt = $db->prepare("
-    SELECT o.*, c.make, c.model, c.year, c.slug, c.price as car_price,
+    SELECT o.*, c.make, c.model, c.year, c.slug, c.price as car_price, c.price_unit,
            (SELECT url FROM car_images WHERE car_id = c.id LIMIT 1) as primary_image
     FROM orders o
     JOIN cars c ON o.car_id = c.id
@@ -87,10 +87,20 @@ ob_start();
                             <span class="text-[10px] font-black tabular-nums text-muted-foreground uppercase opacity-60">#WAMS-ORD-<?php echo sprintf("%05d", $order['id']); ?></span>
                         </td>
                         <td class="px-8 py-6">
-                            <p class="font-black text-foreground tabular-nums"><?php echo formatPrice($order['amount']); ?></p>
+                            <p class="font-black text-foreground tabular-nums"><?php echo formatPrice($order['amount'], $order['price_unit'] ?? null); ?></p>
                         </td>
                         <td class="px-8 py-6">
-                            <span class="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[8px] font-black uppercase tracking-widest text-accent">
+                            <?php
+                            $statusColors = [
+                                'PENDING' => 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500',
+                                'PAID' => 'bg-green-500/10 border-green-500/20 text-green-500',
+                                'SHIPPED' => 'bg-blue-500/10 border-blue-500/20 text-blue-500',
+                                'COMPLETED' => 'bg-green-500 border-transparent text-white',
+                                'CANCELLED' => 'bg-red-500/10 border-red-500/20 text-red-500',
+                            ];
+                            $statusClass = $statusColors[$order['status']] ?? 'bg-muted border-border text-muted-foreground';
+                            ?>
+                            <span class="px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest <?php echo $statusClass; ?>">
                                 <?php echo $order['status']; ?>
                             </span>
                         </td>

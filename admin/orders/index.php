@@ -12,8 +12,8 @@ $db = getDB();
 $status_filter = $_GET['status'] ?? 'ALL';
 
 $query = "
-    SELECT o.*, u.name as customer_name, u.email as customer_email, 
-           c.make, c.model, c.year, c.slug, c.price as car_price
+    SELECT o.*, u.name as customer_name, u.email as customer_email,
+           c.make, c.model, c.year, c.slug, c.price as car_price, c.price_unit
     FROM orders o
     JOIN users u ON o.user_id = u.id
     JOIN cars c ON o.car_id = c.id
@@ -143,7 +143,7 @@ ob_start();
                                 <a href="<?php echo url('car-detail/' . $o['slug']); ?>" target="_blank" class="block text-[8px] font-bold text-accent mt-1 hover:underline">View Asset <i class="fas fa-external-link-alt ml-1"></i></a>
                             </td>
                             <td class="p-8">
-                                <span class="text-xs font-black text-foreground tabular-nums tracking-tighter"><?php echo formatPrice($o['amount']); ?></span>
+                                <span class="text-xs font-black text-foreground tabular-nums tracking-tighter"><?php echo formatPrice($o['amount'], $o['price_unit'] ?? null); ?></span>
                                 <span class="block text-[8px] font-bold text-muted-foreground mt-1 italic"><?php echo $o['payment_method']; ?></span>
                             </td>
                             <td class="p-8">

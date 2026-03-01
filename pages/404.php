@@ -160,7 +160,7 @@ try {
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col">
                                 <span class="text-accent font-black text-lg tracking-tighter leading-none">
-                                    <?php echo isset($car['price']) ? formatPrice($car['price']) : ''; ?>
+                                    <?php echo isset($car['price']) ? formatPrice($car['price'], $car['price_unit'] ?? null) : ''; ?>
                                 </span>
                             </div>
                             <span class="px-3 py-1.5 rounded-lg bg-muted dark:bg-white/5 text-muted-foreground dark:text-gray-400 text-[9px] font-black uppercase tracking-widest border border-border dark:border-white/5">

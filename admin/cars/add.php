@@ -27,17 +27,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'model' => $model,
         'year' => $year,
         'price' => floatval($_POST['price'] ?? 0),
+        'price_unit' => clean($_POST['price_unit'] ?? '') ?: null,
         'mileage' => intval($_POST['mileage'] ?? 0),
-        'vin' => clean($_POST['vin'] ?? null),
+        'vin' => clean($_POST['vin'] ?? null) ?: null,
         'color' => clean($_POST['color'] ?? ''),
         'fuel_type' => $_POST['fuel_type'] ?? 'GASOLINE',
         'transmission' => $_POST['transmission'] ?? 'AUTOMATIC',
         'body_type' => $_POST['body_type'] ?? 'SEDAN',
         'condition' => $_POST['condition'] ?? 'EXCELLENT',
+        'trim' => clean($_POST['trim'] ?? '') ?: null,
+        'engine_capacity' => clean($_POST['engine_capacity'] ?? '') ?: null,
+        'drive_train' => clean($_POST['drive_train'] ?? '') ?: null,
+        'seats' => intval($_POST['seats'] ?? 0) ?: null,
+        'doors' => intval($_POST['doors'] ?? 0) ?: null,
+        'emission' => clean($_POST['emission'] ?? '') ?: null,
+        'finance_info' => clean($_POST['finance_info'] ?? '') ?: null,
         'description' => clean($_POST['description'] ?? ''),
         'features' => json_encode(array_filter(array_map('trim', explode(',', $_POST['features'] ?? '')))),
         'featured' => isset($_POST['featured']) ? 1 : 0,
-        'walkaround_video_url' => clean($_POST['walkaround_video_url'] ?? ''),
+        'walkaround_video_url' => clean($_POST['walkaround_video_url'] ?? '') ?: null,
         'location' => clean($_POST['location'] ?? 'Toronto, ON'),
         'status' => 'AVAILABLE',
         'view_count' => 0,
@@ -51,8 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $db = getDB();
-        $stmt = $db->prepare("INSERT INTO cars (slug, make, model, year, price, mileage, vin, color, fuel_type, transmission, body_type, `condition`, description, features, featured, walkaround_video_url, location, status, view_count, created_at) 
-                             VALUES (:slug, :make, :model, :year, :price, :mileage, :vin, :color, :fuel_type, :transmission, :body_type, :condition, :description, :features, :featured, :walkaround_video_url, :location, :status, :view_count, :created_at)");
+        $stmt = $db->prepare("INSERT INTO cars (slug, make, model, year, price, price_unit, mileage, vin, color, fuel_type, transmission, body_type, `condition`, trim, engine_capacity, drive_train, seats, doors, emission, finance_info, description, features, featured, walkaround_video_url, location, status, view_count, created_at)
+                             VALUES (:slug, :make, :model, :year, :price, :price_unit, :mileage, :vin, :color, :fuel_type, :transmission, :body_type, :condition, :trim, :engine_capacity, :drive_train, :seats, :doors, :emission, :finance_info, :description, :features, :featured, :walkaround_video_url, :location, :status, :view_count, :created_at)");
         $stmt->execute($data);
         $carId = $db->lastInsertId();
 
@@ -152,6 +160,18 @@ ob_start();
                                class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
                     </div>
                     <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Price Currency</label>
+                        <select name="price_unit" class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold appearance-none outline-none">
+                            <option value="">Default (USD)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="AED">AED</option>
+                            <option value="CNY">CNY (¥)</option>
+                            <option value="JPY">JPY (¥)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-3">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Distance Travelled (Miles)</label>
                         <input type="number" name="mileage" required placeholder="5200"
                                class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
@@ -159,6 +179,41 @@ ob_start();
                     <div class="space-y-3">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Exterior Shade (Color)</label>
                         <input type="text" name="color" placeholder="e.g. Guards Red"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Trim Level</label>
+                        <input type="text" name="trim" placeholder="e.g. Sport, Premium, GT"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Engine Capacity</label>
+                        <input type="text" name="engine_capacity" placeholder="e.g. 3.0L V6, 2000cc"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Drive Train</label>
+                        <select name="drive_train" class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold appearance-none outline-none">
+                            <option value="">Select Drive Train</option>
+                            <option value="FWD">Front-Wheel Drive (FWD)</option>
+                            <option value="RWD">Rear-Wheel Drive (RWD)</option>
+                            <option value="AWD">All-Wheel Drive (AWD)</option>
+                            <option value="4WD">Four-Wheel Drive (4WD)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Seating Capacity</label>
+                        <input type="number" name="seats" min="1" max="20" placeholder="e.g. 5"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Number of Doors</label>
+                        <input type="number" name="doors" min="2" max="6" placeholder="e.g. 4"
+                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Emission Standard</label>
+                        <input type="text" name="emission" placeholder="e.g. Euro 6, CARB"
                                class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
                     </div>
                     <div class="space-y-3">
@@ -221,6 +276,12 @@ ob_start();
                 </div>
 
                 <div class="mt-10 space-y-3">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Finance Information</label>
+                    <input type="text" name="finance_info" placeholder="e.g. Financing available from $X/month"
+                           class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
+                </div>
+
+                <div class="mt-8 space-y-3">
                     <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Narrative (Description)</label>
                     <textarea name="description" rows="5" placeholder="Describe the soul and heritage of this vehicle..."
                               class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-3xl focus:ring-2 focus:ring-accent focus:border-accent transition font-medium italic outline-none"></textarea>
@@ -309,10 +370,10 @@ ob_start();
                 
                 if (typeof gsap !== 'undefined') {
                     gsap.from(div, {
-                        scale: 0.8,
+                        scale: 0.9,
                         opacity: 0,
-                        duration: 0.5,
-                        ease: "back.out(1.7)"
+                        duration: 0.4,
+                        ease: "power2.out"
                     });
                 }
             };

@@ -18,13 +18,15 @@
     <!-- Animation & Interactivity Libraries -->
     <link rel="stylesheet" href="<?php echo url('assets/css/animate.min.css'); ?>"/>
     <link rel="stylesheet" href="<?php echo url('assets/css/swiper-bundle.min.css'); ?>"/>
+    <link rel="stylesheet" href="<?php echo url('assets/css/optimized-animations.css?v=' . time()); ?>"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    
+
     <script src="<?php echo url('assets/js/gsap.min.js'); ?>"></script>
     <script src="<?php echo url('assets/js/ScrollTrigger.min.js'); ?>"></script>
     <script src="<?php echo url('assets/js/swiper-bundle.min.js'); ?>"></script>
     <script src="<?php echo url('assets/js/lenis.min.js'); ?>"></script>
     <script src="<?php echo url('assets/js/motion.js?v=' . time()); ?>"></script>
+    <script src="<?php echo url('assets/js/animation-controller.js?v=' . time()); ?>"></script>
     <script defer src="https://unpkg.com/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="<?php echo url('assets/js/alpine.min.js?v=' . time()); ?>"></script>
@@ -51,6 +53,7 @@
             window.BASE_URL = '<?php echo SITE_URL; ?>';
             window.isLoggedIn = <?php echo isLoggedIn() ? 'true' : 'false'; ?>;
             window.csrfToken = '<?php echo generateCSRFToken(); ?>';
+            window.i18n = <?php echo I18n::jsTranslations(); ?>;
         })();
     </script>
 
@@ -96,8 +99,12 @@
                     }
                 }
             }
-        }
+        };
     </script>
+    <style>
+        [v-cloak] { display: none !important; }
+        .car-card.visible { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
+    </style>
     
     <style>
         :root { 
@@ -301,13 +308,13 @@
                                 <i class="fas fa-chevron-down text-[10px] opacity-50"></i>
                             </button>
                             <div x-show="open" x-cloak class="absolute top-full right-0 mt-2 w-32 bg-background border border-border rounded-2xl shadow-2xl p-2 z-[200]">
-                                <a href="?lang=en" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted transition-all text-sm font-bold <?php echo I18n::getLocale() === 'en' ? 'text-accent' : 'text-foreground'; ?>">
+                                <a href="<?php echo I18n::switchUrl('lang', 'en'); ?>" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted transition-all text-sm font-bold <?php echo I18n::getLocale() === 'en' ? 'text-accent' : 'text-foreground'; ?>">
                                     <span>EN</span> <?php echo __('lang_en'); ?>
                                 </a>
-                                <a href="?lang=es" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted transition-all text-sm font-bold <?php echo I18n::getLocale() === 'es' ? 'text-accent' : 'text-foreground'; ?>">
+                                <a href="<?php echo I18n::switchUrl('lang', 'es'); ?>" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted transition-all text-sm font-bold <?php echo I18n::getLocale() === 'es' ? 'text-accent' : 'text-foreground'; ?>">
                                     <span>ES</span> <?php echo __('lang_es'); ?>
                                 </a>
-                                <a href="?lang=zh" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted transition-all text-sm font-bold <?php echo I18n::getLocale() === 'zh' ? 'text-accent' : 'text-foreground'; ?>">
+                                <a href="<?php echo I18n::switchUrl('lang', 'zh'); ?>" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted transition-all text-sm font-bold <?php echo I18n::getLocale() === 'zh' ? 'text-accent' : 'text-foreground'; ?>">
                                     <span>ZH</span> <?php echo __('lang_zh'); ?>
                                 </a>
                             </div>
@@ -321,7 +328,7 @@
                             </button>
                             <div x-show="open" x-cloak class="absolute top-full right-0 mt-2 w-32 bg-background border border-border rounded-2xl shadow-2xl p-2 z-[200]">
                                 <?php foreach (['USD', 'EUR', 'GBP', 'AED', 'CNY', 'GHS'] as $curr): ?>
-                                    <a href="?currency=<?php echo $curr; ?>" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-muted transition-all text-sm font-bold <?php echo I18n::getCurrency() === $curr ? 'text-accent' : 'text-foreground'; ?>">
+                                    <a href="<?php echo I18n::switchUrl('currency', $curr); ?>" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-muted transition-all text-sm font-bold <?php echo I18n::getCurrency() === $curr ? 'text-accent' : 'text-foreground'; ?>">
                                         <?php echo $curr; ?>
                                         <?php if (I18n::getCurrency() === $curr): ?>
                                             <i class="fas fa-check text-[10px]"></i>
@@ -409,7 +416,7 @@
 
                 <!-- Mobile Trigger -->
                 <div class="md:hidden flex items-center gap-4 relative z-[101]">
-                    <button class="text-foreground p-2 hover:text-accent transition-colors" @click="toggleMobileMenu(); mobileMenu = !mobileMenu">
+                    <button class="text-foreground p-2 hover:text-accent transition-colors" @click="optimizedToggleMobileMenu(); mobileMenu = !mobileMenu">
                         <i class="fas fa-bars-staggered text-2xl"></i>
                     </button>
                 </div>
@@ -418,20 +425,20 @@
     </nav>
 
     <!-- Mobile Sidebar Backdrop -->
-    <div x-show="mobileMenu" 
-         x-transition:enter="transition ease-out duration-150"
+    <div x-show="mobileMenu"
+         x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         @click="toggleMobileMenu(); mobileMenu = false"
+         @click="optimizedToggleMobileMenu(); mobileMenu = false"
          class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
          x-cloak></div>
 
     <!-- Premium Mobile Sidebar -->
-    <aside id="mobile-menu" 
-           class="fixed top-0 left-[-20rem] h-full w-80 bg-[#0f172a] text-white flex flex-col z-[300] transition-transform duration-300 ease-in-out border-r border-white/5 shadow-2xl overflow-hidden"
+    <aside id="mobile-menu"
+           class="fixed top-0 left-0 h-full w-80 bg-[#0f172a] text-white flex flex-col z-[300] border-r border-white/5 shadow-2xl overflow-hidden"
            x-cloak>
         
         <div class="p-8 pb-4 flex justify-between items-center">
@@ -444,7 +451,7 @@
                     <p class="text-[8px] font-black uppercase tracking-[0.3em] text-accent mt-1">Toronto Elite</p>
                 </div>
             </div>
-            <button @click="toggleMobileMenu(); mobileMenu = false" class="text-white/40 hover:text-white transition-colors">
+            <button @click="optimizedToggleMobileMenu(); mobileMenu = false" class="text-white/40 hover:text-white transition-colors">
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
@@ -496,14 +503,22 @@
                         </div>
                         <i class="fas fa-chevron-down text-[10px] opacity-40 transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
                     </button>
-                    <div x-show="open" x-cloak class="mt-2 flex flex-col gap-1 p-2 bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
-                        <a href="?lang=en" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'en' ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         x-cloak
+                         class="mt-2 flex flex-col gap-1 p-2 bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
+                        <a href="<?php echo I18n::switchUrl('lang', 'en'); ?>" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'en' ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
                             <span class="text-xs font-black uppercase tracking-widest">English</span>
                         </a>
-                        <a href="?lang=es" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'es' ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
+                        <a href="<?php echo I18n::switchUrl('lang', 'es'); ?>" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'es' ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
                             <span class="text-xs font-black uppercase tracking-widest">Español</span>
                         </a>
-                        <a href="?lang=zh" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'zh' ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
+                        <a href="<?php echo I18n::switchUrl('lang', 'zh'); ?>" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getLocale() === 'zh' ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
                             <span class="text-xs font-black uppercase tracking-widest">中文 (Chinese)</span>
                         </a>
                     </div>
@@ -518,9 +533,17 @@
                         </div>
                         <i class="fas fa-chevron-down text-[10px] opacity-40 transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
                     </button>
-                    <div x-show="open" x-cloak class="mt-2 grid grid-cols-2 gap-2 p-2 bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         x-cloak
+                         class="mt-2 grid grid-cols-2 gap-2 p-2 bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
                         <?php foreach (['USD', 'EUR', 'GBP', 'AED', 'CNY', 'GHS'] as $curr): ?>
-                            <a href="?currency=<?php echo $curr; ?>" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getCurrency() === $curr ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
+                            <a href="<?php echo I18n::switchUrl('currency', $curr); ?>" class="flex items-center justify-between p-3 rounded-xl transition-all <?php echo I18n::getCurrency() === $curr ? 'bg-accent text-white shadow-lg' : 'hover:bg-white/5 text-white/60'; ?>">
                                 <span class="text-xs font-black"><?php echo $curr; ?></span>
                             </a>
                         <?php endforeach; ?>
@@ -560,61 +583,27 @@
         }
 
         window.toggleMobileMenu = async function() {
-            const menu = document.getElementById('mobile-menu');
-            const links = document.querySelectorAll('#mobile-menu nav > *');
-            
-            if (!isMenuOpen) {
-                isMenuOpen = true;
-                if (lenis) lenis.stop();
-                
-                // Show menu from left
-                await animate(menu, { x: "100%" }, { 
-                    duration: 0.4, 
-                    easing: [0.16, 1, 0.3, 1] 
-                }).finished;
-
-                animate(links, { opacity: [0, 1], y: [20, 0] }, { 
-                    delay: stagger(0.04),
-                    duration: 0.3
-                });
-
-            } else {
-                isMenuOpen = false;
-                
-                animate(links, { opacity: 0, y: 10 }, { 
-                    duration: 0.3 
-                });
-
-                // Hide menu back to left
-                await animate(menu, { x: 0 }, { 
-                    duration: 0.3,
-                    easing: "ease-in"
-                }).finished;
-                
-                if (lenis) lenis.start();
+            // Use optimized version
+            if (typeof window.optimizedToggleMobileMenu === 'function') {
+                window.optimizedToggleMobileMenu();
             }
         }
 
-        // Header Scroll Effect
+        // Header Scroll Effect - now handled by animation-controller.js
+        // Keeping this for backwards compatibility
         window.addEventListener('scroll', () => {
-            const nav = document.getElementById('main-nav');
-            const progress = document.getElementById('scroll-progress');
-            const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            
-            if (progress) progress.style.width = scrollPercent + '%';
-
-            if (window.scrollY > 50) {
-                nav.classList.add('glass', 'h-20', 'border-border/10', 'shadow-lg');
-                nav.classList.remove('h-24', 'border-transparent');
-            } else {
-                nav.classList.remove('glass', 'h-20', 'border-border/10', 'shadow-lg');
-                nav.classList.add('h-24', 'border-transparent');
-            }
+            // Delegated to animation-controller.js for better performance
         });
 
         // Initialize GSAP with Safety
         if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
             gsap.registerPlugin(ScrollTrigger);
+
+            // Configure ScrollTrigger for better performance
+            ScrollTrigger.config({
+                limitCallbacks: true,
+                syncInterval: 150
+            });
         }
 
         // Preloader Logic

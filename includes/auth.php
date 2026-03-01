@@ -49,6 +49,16 @@ function isAdminRole() {
 }
 
 /**
+ * Enforces admin authentication and redirects if not admin
+ */
+function requireAdmin() {
+    requireAuth();
+    if (!isAdminRole()) {
+        redirect(url());
+    }
+}
+
+/**
  * Destroys session and redirects to home
  */
 function logout() {

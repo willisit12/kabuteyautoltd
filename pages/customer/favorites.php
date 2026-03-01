@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_id'])) {
 }
 
 $stmt = $db->prepare("
-    SELECT f.*, c.make, c.model, c.year, c.slug, c.price, c.status as car_status,
+    SELECT f.*, c.make, c.model, c.year, c.slug, c.price, c.price_unit, c.status as car_status,
            (SELECT url FROM car_images WHERE car_id = c.id LIMIT 1) as primary_image
     FROM favorites f
     JOIN cars c ON f.car_id = c.id
@@ -82,7 +82,7 @@ ob_start();
                                 <h2 class="text-xl font-black text-foreground tracking-tighter uppercase leading-none"><?php echo $fv['year'] . ' ' . clean($fv['make'] . ' ' . $fv['model']); ?></h2>
                                 <p class="text-[10px] font-bold text-accent uppercase tracking-widest mt-2">Active Spec</p>
                             </div>
-                            <p class="text-lg font-black text-foreground tabular-nums tracking-tighter"><?php echo formatPrice($fv['price']); ?></p>
+                            <p class="text-lg font-black text-foreground tabular-nums tracking-tighter"><?php echo formatPrice($fv['price'], $fv['price_unit'] ?? null); ?></p>
                         </div>
                         <div class="flex gap-4 mb-8">
                             <span class="px-3 py-1 rounded-full bg-muted border border-border/30 text-[8px] font-black uppercase tracking-widest text-muted-foreground">Certified</span>

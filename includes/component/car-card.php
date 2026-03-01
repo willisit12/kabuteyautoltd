@@ -8,7 +8,7 @@ function renderCarCard($car, $extraClasses = '') {
 
     $image = !empty($car['primary_image']) ? url($car['primary_image']) : 'https://placehold.co/400x300?text=No+Image';
     $name = clean($car['make'] . ' ' . $car['model'] . ' ' . $car['year'] . ' ' . ($car['trim'] ?? ''));
-    $price = formatPrice($car['price']);
+    $price = formatPrice($car['price'], $car['price_unit'] ?? null);
     $mileage = formatMileage($car['mileage']);
     $fuel = $car['fuel_type'];
     $year = $car['year'];
@@ -52,11 +52,11 @@ function renderCarCard($car, $extraClasses = '') {
                     .then(data => {
                         if (data.status === 'success') {
                             this.isFavorited = (data.favorite_status === 'added');
-                            window.dispatchEvent(new CustomEvent('notify', { 
-                                detail: { 
-                                    message: this.isFavorited ? 'Added to curated collection' : 'Removed from curated collection',
+                            window.dispatchEvent(new CustomEvent('notify', {
+                                detail: {
+                                    message: this.isFavorited ? window.i18n.added_to_favorites : window.i18n.removed_from_favorites,
                                     type: 'success'
-                                } 
+                                }
                             }));
                         }
                     })

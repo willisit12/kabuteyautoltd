@@ -23,6 +23,7 @@ if (isLoggedIn()) {
     $stmt->execute([$_SESSION['user_id'], $car['id']]);
     $isFavorited = (bool)$stmt->fetch();
 }
+$car['is_favorited'] = $isFavorited;
 
 include_once __DIR__ . '/../includes/layout/header.php';
 ?>
@@ -67,7 +68,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
             <!-- Immersive Gallery -->
-            <div class="reveal-section">
+            <div class="reveal-section lg:self-start lg:sticky lg:top-32">
                 <div class="relative group/gallery">
                     <!-- Main Swiper -->
                     <div class="swiper detailSwiper rounded-[3rem] overflow-hidden shadow-2xl h-[400px] md:h-[550px] border border-border/50">
@@ -138,7 +139,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                     </h1>
                     <div class="flex items-center gap-6 mt-6">
                         <div class="text-3xl md:text-5xl font-black text-foreground tracking-tighter">
-                            <?php echo formatPrice($car['price']); ?>
+                            <?php echo formatPrice($car['price'], $car['price_unit'] ?? null); ?>
                         </div>
                         <div class="h-8 w-[1px] bg-border/20"></div>
                         <div class="px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent font-black text-[10px] uppercase tracking-widest">
@@ -147,8 +148,39 @@ include_once __DIR__ . '/../includes/layout/header.php';
                     </div>
                 </div>
                 
+                <!-- Status / Meta Bar -->
+                <div class="reveal-section flex flex-wrap items-center gap-3 mb-8">
+                    <?php
+                    $statusColors = [
+                        'AVAILABLE' => 'bg-green-500/10 border-green-500/20 text-green-500',
+                        'SOLD'      => 'bg-red-500/10 border-red-500/20 text-red-500',
+                        'RESERVED'  => 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500',
+                        'ARCHIVED'  => 'bg-muted border-border text-muted-foreground',
+                    ];
+                    $statusClass = $statusColors[$car['status'] ?? 'AVAILABLE'] ?? $statusColors['AVAILABLE'];
+                    ?>
+                    <span class="px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest <?php echo $statusClass; ?>">
+                        <?php echo clean($car['status'] ?? 'AVAILABLE'); ?>
+                    </span>
+                    <?php if (!empty($car['body_type'])): ?>
+                    <span class="px-3 py-1 rounded-full border border-border/40 bg-muted/30 text-[10px] font-black uppercase tracking-widest text-foreground/60">
+                        <i class="fas fa-car mr-1"></i><?php echo clean($car['body_type']); ?>
+                    </span>
+                    <?php endif; ?>
+                    <?php if (!empty($car['year'])): ?>
+                    <span class="px-3 py-1 rounded-full border border-border/40 bg-muted/30 text-[10px] font-black uppercase tracking-widest text-foreground/60">
+                        <i class="fas fa-calendar mr-1"></i><?php echo intval($car['year']); ?>
+                    </span>
+                    <?php endif; ?>
+                    <?php if (!empty($car['location'])): ?>
+                    <span class="px-3 py-1 rounded-full border border-border/40 bg-muted/30 text-[10px] font-black uppercase tracking-widest text-foreground/60">
+                        <i class="fas fa-map-marker-alt mr-1"></i><?php echo clean($car['location']); ?>
+                    </span>
+                    <?php endif; ?>
+                </div>
+
                 <!-- Spec Grid -->
-                <div class="reveal-section glass rounded-[2.5rem] p-8 md:p-10 mb-10 border border-border/50 shadow-xl relative overflow-hidden">
+                <div class="reveal-section glass rounded-[2.5rem] p-8 md:p-10 mb-6 border border-border/50 shadow-xl relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-8 opacity-5">
                         <i class="fas fa-shield-check text-6xl text-foreground"></i>
                     </div>
@@ -162,20 +194,144 @@ include_once __DIR__ . '/../includes/layout/header.php';
                             <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo formatMileage($car['mileage']); ?></span>
                         </div>
                         <div class="group/spec">
-                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Drive Train</span>
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Transmission</span>
                             <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo clean($car['transmission']); ?></span>
                         </div>
                         <div class="group/spec">
-                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Energy Source</span>
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Fuel Type</span>
                             <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo clean($car['fuel_type']); ?></span>
                         </div>
                         <div class="group/spec">
-                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Exterior Shade</span>
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Color</span>
                             <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo clean($car['color']); ?></span>
                         </div>
+                        <?php if (!empty($car['drive_train'])): ?>
+                        <div class="group/spec">
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Drive Train</span>
+                            <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo clean($car['drive_train']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($car['engine_capacity'])): ?>
+                        <div class="group/spec">
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Engine</span>
+                            <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo clean($car['engine_capacity']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($car['seats'])): ?>
+                        <div class="group/spec">
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Seats</span>
+                            <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo intval($car['seats']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($car['doors'])): ?>
+                        <div class="group/spec">
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Doors</span>
+                            <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo intval($car['doors']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($car['emission'])): ?>
+                        <div class="group/spec">
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Emission</span>
+                            <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo clean($car['emission']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($car['trim'])): ?>
+                        <div class="group/spec">
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 group-hover/spec:text-accent transition-colors underline decoration-accent/20 decoration-2 underline-offset-4">Trim</span>
+                            <span class="text-lg md:text-xl font-black text-foreground tracking-tighter"><?php echo clean($car['trim']); ?></span>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
-                
+
+                <!-- Extra Info Row: VIN / Condition Score / Finance -->
+                <?php $hasExtra = !empty($car['vin']) || !empty($car['condition_score']) || !empty($car['finance_info']); ?>
+                <?php if ($hasExtra): ?>
+                <div class="reveal-section glass rounded-[2.5rem] p-6 md:p-8 mb-6 border border-border/50 shadow-xl">
+                    <div class="flex flex-wrap gap-6">
+                        <?php if (!empty($car['vin'])): ?>
+                        <div>
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-1">VIN</span>
+                            <span class="font-mono text-sm font-bold text-foreground tracking-wider"><?php echo clean($car['vin']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($car['condition_score'])): ?>
+                        <div>
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Condition Score</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl font-black text-accent"><?php echo intval($car['condition_score']); ?></span>
+                                <span class="text-muted-foreground text-xs font-bold">/10</span>
+                                <div class="flex gap-0.5 ml-1">
+                                    <?php for ($i = 1; $i <= 10; $i++): ?>
+                                    <div class="w-2 h-4 rounded-sm <?php echo $i <= intval($car['condition_score']) ? 'bg-accent' : 'bg-muted'; ?>"></div>
+                                    <?php endfor; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($car['finance_info'])): ?>
+                        <div class="flex-1 min-w-[200px]">
+                            <span class="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Finance Info</span>
+                            <span class="text-sm font-bold text-foreground"><?php echo clean($car['finance_info']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Features Tags -->
+                <?php
+                $featuresArr = [];
+                if (!empty($car['features'])) {
+                    $decoded = json_decode($car['features'], true);
+                    if (is_array($decoded)) $featuresArr = $decoded;
+                }
+                ?>
+                <?php if (!empty($featuresArr)): ?>
+                <div class="reveal-section mb-6">
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 mb-4 flex items-center gap-3">
+                        <span class="w-2 h-2 bg-accent rounded-full"></span>
+                        Key Features
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        <?php foreach ($featuresArr as $feat): ?>
+                        <span class="px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-wider">
+                            <?php echo clean($feat); ?>
+                        </span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Walkaround Video -->
+                <?php if (!empty($car['walkaround_video_url'])): ?>
+                <div class="reveal-section glass rounded-[2.5rem] p-6 md:p-8 mb-6 border border-border/50 shadow-xl">
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 mb-4 flex items-center gap-3">
+                        <span class="w-2 h-2 bg-accent rounded-full"></span>
+                        Walkaround Video
+                    </h4>
+                    <?php
+                    $videoUrl = $car['walkaround_video_url'];
+                    $embedUrl = null;
+                    if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $videoUrl, $m)) {
+                        $embedUrl = 'https://www.youtube.com/embed/' . $m[1];
+                    } elseif (preg_match('/vimeo\.com\/(\d+)/', $videoUrl, $m)) {
+                        $embedUrl = 'https://player.vimeo.com/video/' . $m[1];
+                    }
+                    ?>
+                    <?php if ($embedUrl): ?>
+                    <div class="aspect-video rounded-2xl overflow-hidden">
+                        <iframe src="<?php echo $embedUrl; ?>" class="w-full h-full" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <?php else: ?>
+                    <a href="<?php echo clean($videoUrl); ?>" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-3 text-accent font-bold text-sm hover:underline">
+                        <i class="fas fa-play-circle text-xl"></i> Watch Walkaround Video
+                    </a>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
                 <!-- Description -->
                 <div class="reveal-section glass rounded-[2.5rem] p-8 md:p-10 mb-12 border border-border/50 shadow-xl">
                     <h4 class="text-xs font-black uppercase tracking-[0.2em] text-foreground/40 mb-6 italic">Vehicle Narrative</h4>
@@ -190,16 +346,16 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 <div class="reveal-section flex flex-col sm:flex-row gap-6">
                     <?php if (isLoggedIn()): ?>
                         <!-- Acquisition Trigger -->
-                        <button 
-                            x-data="{ 
+                        <button
+                            x-data="{
                                 loading: false,
                                 async initiate() {
-                                    if (!confirm('Are you ready to initiate the formal acquisition protocol for this vehicle?')) return;
+                                    if (!confirm(window.i18n.place_order_confirm)) return;
                                     this.loading = true;
                                     try {
                                         const res = await fetch('<?php echo url('api/orders'); ?>', {
                                             method: 'POST',
-                                            headers: { 
+                                            headers: {
                                                 'Content-Type': 'application/json',
                                                 'X-CSRF-TOKEN': window.csrfToken
                                             },
@@ -207,25 +363,25 @@ include_once __DIR__ . '/../includes/layout/header.php';
                                         });
                                         const data = await res.json();
                                         if (data.status === 'success') {
-                                            window.location.href = '<?php echo url('dashboard'); ?>';
+                                            window.location.href = '<?php echo url('customer/orders/view/'); ?>' + data.order_id;
                                         } else {
-                                            alert(data.error || 'Acquisition failure.');
+                                            alert(data.error || window.i18n.could_not_place_order);
                                         }
-                                    } catch (e) { 
-                                        console.error(e); 
-                                        alert('Network protocol failure.');
-                                    } finally { 
-                                        this.loading = false; 
+                                    } catch (e) {
+                                        alert(window.i18n.network_error);
+                                    } finally {
+                                        this.loading = false;
                                     }
                                 }
                             }"
                             @click="initiate()"
                             :disabled="loading"
-                            class="flex-1 bg-accent text-white text-center py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-[0_20px_50px_rgba(249,115,22,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50"
+                            class="flex-1 bg-accent text-white text-center py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-[0_20px_50px_rgba(249,115,22,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <span x-show="!loading">Initiate Acquisition</span>
+                            <i class="fas fa-file-signature text-xl" x-show="!loading"></i>
+                            <span x-show="!loading">Place Order</span>
                             <span x-show="loading" class="flex items-center gap-2">
-                                <i class="fas fa-circle-notch animate-spin text-[10px]"></i> Processing...
+                                <i class="fas fa-circle-notch animate-spin"></i> Processing...
                             </span>
                         </button>
 
@@ -250,11 +406,11 @@ include_once __DIR__ . '/../includes/layout/header.php';
                                         const data = await res.json();
                                         if (data.status === 'success') {
                                             this.favorited = (data.favorite_status === 'added');
-                                            window.dispatchEvent(new CustomEvent('notify', { 
-                                                detail: { 
-                                                    message: this.favorited ? 'Added to curated collection' : 'Removed from curated collection',
+                                            window.dispatchEvent(new CustomEvent('notify', {
+                                                detail: {
+                                                    message: this.favorited ? window.i18n.added_to_favorites : window.i18n.removed_from_favorites,
                                                     type: 'success'
-                                                } 
+                                                }
                                             }));
                                         }
                                     } catch (e) { console.error(e); }
@@ -633,14 +789,14 @@ include_once __DIR__ . '/../includes/layout/header.php';
             }
         });
 
-        // GSAP Entrance
-        const tl = gsap.timeline({ defaults: { ease: "power4.out" }});
-        
+        // GSAP Entrance - optimized
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" }});
+
         tl.from(".reveal-section", {
-            y: 40,
+            y: 30,
             opacity: 0,
-            duration: 1.2,
-            stagger: 0.15,
+            duration: 0.8,
+            stagger: 0.12,
             clearProps: "all"
         });
     });

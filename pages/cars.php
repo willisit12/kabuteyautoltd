@@ -63,6 +63,9 @@ document.addEventListener('alpine:init', () => {
                 this.page = 1;
                 this.fetchResults(true);
             });
+
+            // Initial load
+            this.fetchResults(true);
         },
 
         generateFilterLabels() {
@@ -162,16 +165,16 @@ document.addEventListener('alpine:init', () => {
                 const targets = document.querySelectorAll("#inventory-results .car-card");
                 if (targets.length === 0) return;
 
-                gsap.fromTo(targets, 
-                    { opacity: 0, y: 30 },
-                    { 
-                        opacity: 1, 
-                        y: 0, 
-                        duration: 0.8, 
-                        stagger: 0.05, 
-                        ease: "power4.out",
+                gsap.fromTo(targets,
+                    { opacity: 0, y: 20 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        stagger: 0.04,
+                        ease: "power3.out",
                         force3D: true,
-                        background: 'transparent'
+                        clearProps: "transform"
                     }
                 );
             }
@@ -179,15 +182,16 @@ document.addEventListener('alpine:init', () => {
 
         animateNewCards() {
             if (typeof gsap !== 'undefined') {
-                const targets = document.querySelectorAll(".car-card.opacity-0");
-                if (targets.length === 0) return;
+                const newCards = document.querySelectorAll(".car-card.opacity-0");
+                if (newCards.length === 0) return;
 
-                gsap.to(targets, {
+                gsap.to(newCards, {
                     opacity: 1,
                     y: 0,
                     duration: 0.6,
                     stagger: 0.05,
-                    ease: "power2.out"
+                    ease: "power2.out",
+                    clearProps: "all"
                 });
             }
         },

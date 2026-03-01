@@ -8,7 +8,16 @@
       "Read(//c/xampp/htdocs/car-website/**)",
       "Bash(for dir in \"D:\\\\Williams Projects\\\\Projects\\\\AI\\\\ClaudeCode\\\\Scraper\\\\cars\"/*)",
       "Bash(do basename \"$dir\")",
-      "Bash(done)"
+      "Bash(done)",
+      "mcp__chrome-devtools__click",
+      "Bash(php -r \"require ''includes/db.php''; $db = getDB\\(\\); $result = $db->query\\(''DESCRIBE cars''\\); $cols = $result->fetchAll\\(PDO::FETCH_ASSOC\\); foreach\\($cols as $col\\) { echo $col[''Field''] . '' | '' . $col[''Type''] . '' | '' . $col[''Null''] . '' | '' . $col[''Default''] . PHP_EOL; }\")",
+      "Bash(find . -name \"*.sql\" -exec grep -l \"price_unit\" {} ;)",
+      "Bash(xargs grep -l \"ALTER TABLE cars\")",
+      "Bash(xargs grep -l \"condition_score\\\\|emission\\\\|finance_info\\\\|source_url\\\\|price_unit\\\\|imported_at\")",
+      "Bash(grep -n \"CREATE TABLE cars\\\\|engine_capacity\\\\|drive_train\\\\|seats\\\\|doors\\\\|price_unit\\\\|trim\\\\|emission\\\\|finance_info\\\\|condition_score\" database/*.sql database/*.php)",
+      "Bash(xargs grep -l \"I18n\\\\|__\\(\")",
+      "Bash(xargs wc -l)",
+      "Bash(xargs grep -l \"price_unit\")"
     ]
   }
 }

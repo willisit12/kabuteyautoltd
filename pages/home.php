@@ -231,11 +231,11 @@ include_once __DIR__ . '/../includes/layout/header.php';
                                 .then(data => {
                                     if (data.status === 'success') {
                                         this.isFavorited = (data.favorite_status === 'added');
-                                        window.dispatchEvent(new CustomEvent('notify', { 
-                                            detail: { 
-                                                message: this.isFavorited ? 'Added to curated collection' : 'Removed from curated collection',
+                                        window.dispatchEvent(new CustomEvent('notify', {
+                                            detail: {
+                                                message: this.isFavorited ? window.i18n.added_to_favorites : window.i18n.removed_from_favorites,
                                                 type: 'success'
-                                            } 
+                                            }
                                         }));
                                     }
                                 })
@@ -262,7 +262,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                                     </div>
                                 </div>
                                 <div class="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto">
-                                    <span class="text-2xl md:text-5xl font-black text-white whitespace-nowrap"><?php echo formatPrice($car['price']); ?></span>
+                                    <span class="text-2xl md:text-5xl font-black text-white whitespace-nowrap"><?php echo formatPrice($car['price'], $car['price_unit'] ?? null); ?></span>
                                     <a href="<?php echo url('car-detail/' . $car['slug']); ?>" class="btn-premium bg-white text-primary px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm md:text-base hover:bg-accent hover:text-white transition-all shadow-xl">
                                         Discover
                                     </a>
@@ -400,34 +400,37 @@ include_once __DIR__ . '/../includes/layout/header.php';
         const fallback = setTimeout(() => {
             const items = document.querySelectorAll('.car-card, .reveal-section, .car-metric-card');
             items.forEach(c => {
-                c.style.opacity = '1';
-                c.style.transform = 'translateY(0)';
+                c.classList.add('loaded');
+                c.classList.add('visible');
             });
-        }, 1500);
+        }, 1000);
 
-        // --- GSAP Entrances ---
-        const tl = gsap.timeline({ 
-            defaults: { ease: "power4.out" },
+        // --- GSAP Entrances (Optimized) ---
+        const tl = gsap.timeline({
+            defaults: { ease: "power3.out" },
             onComplete: () => clearTimeout(fallback)
         });
-        
-        // Hero Animation
-        tl.to("#hero-bg", { scale: 1, duration: 2.5 })
-          .from("#main-title", { y: 100, opacity: 0, duration: 1.5, skewY: 7 }, "-=1.5")
-          .to("#hero-desc", { opacity: 1, y: 0, duration: 1 }, "-=0.8")
-          .to("#hero-btns", { opacity: 1, y: 0, duration: 1 }, "-=0.8")
-          .to("#scroll-hint", { opacity: 1, duration: 1 }, "-=0.5");
 
-        // Scroll Triggers
+        // Hero Animation - smoother and faster
+        tl.to("#hero-bg", { scale: 1, duration: 2, ease: "power2.out" })
+          .from("#main-title", { y: 80, opacity: 0, duration: 1.2, ease: "power3.out" }, "-=1.2")
+          .to("#hero-desc", { opacity: 1, y: 0, duration: 0.8 }, "-=0.6")
+          .to("#hero-btns", { opacity: 1, y: 0, duration: 0.8 }, "-=0.6")
+          .to("#scroll-hint", { opacity: 1, duration: 0.6 }, "-=0.4");
+
+        // Scroll Triggers - optimized with better performance
         gsap.utils.toArray('.reveal-section').forEach(section => {
             gsap.from(section, {
                 scrollTrigger: {
                     trigger: section,
-                    start: "top 80%",
+                    start: "top 85%",
+                    toggleActions: "play none none none",
+                    once: true
                 },
-                y: 50,
+                y: 40,
                 opacity: 0,
-                duration: 1,
+                duration: 0.8,
+                ease: "power2.out"
             });
         });
 
@@ -436,38 +439,45 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 scrollTrigger: {
                     trigger: card,
                     start: "top 90%",
+                    toggleActions: "play none none none",
+                    once: true
                 },
-                y: 60,
+                y: 50,
                 opacity: 0,
-                duration: 1,
-                delay: i * 0.2
+                duration: 0.8,
+                delay: i * 0.15,
+                ease: "power2.out"
             });
         });
 
-        // Inventory Grid Animation
+        // Inventory Grid Animation - smoother stagger
         gsap.to("#car-grid .car-card", {
             scrollTrigger: {
                 trigger: "#car-grid",
                 start: "top 85%",
+                toggleActions: "play none none none",
+                once: true
             },
             y: 0,
             opacity: 1,
-            duration: 0.8,
-            stagger: 0.1,
-            ease: "power2.out"
+            duration: 0.6,
+            stagger: 0.08,
+            ease: "power2.out",
+            clearProps: "all"
         });
 
-        // Carousel Initialization
+        // Carousel Initialization - optimized
         new Swiper('.featured-carousel', {
             slidesPerView: 'auto',
-            spaceBetween: 20, // Reduced gaps
+            spaceBetween: 20,
             centeredSlides: true,
             loop: true,
             grabCursor: true,
-            speed: 1200,
+            speed: 800,
             autoplay: {
                 delay: 5000,
-                disableOnInteraction: false
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true
             },
             navigation: {
                 nextEl: '.swiper-button-next-custom',
@@ -481,20 +491,25 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 }
             },
             effect: 'slide',
-            keyboard: true
+            keyboard: true,
+            lazy: {
+                loadPrevNext: true,
+                loadPrevNextAmount: 2
+            }
         });
 
-        // Testimonials Carousel
+        // Testimonials Carousel - optimized
         new Swiper('.testimonials-carousel', {
             slidesPerView: 'auto',
             spaceBetween: 24,
             centeredSlides: true,
             loop: true,
             grabCursor: true,
-            speed: 1000,
+            speed: 700,
             autoplay: {
-                delay: 3500,
-                disableOnInteraction: false
+                delay: 4000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true
             },
             breakpoints: {
                 768: {
@@ -531,16 +546,17 @@ include_once __DIR__ . '/../includes/layout/header.php';
                     
                     const grid = document.getElementById('car-grid');
                     
-                    newCards.forEach((card, i) => {
+                    newCards.forEach((card) => {
                         grid.appendChild(card);
-                        // Animate in new cards
-                        gsap.to(card, {
-                            opacity: 1,
-                            y: 0,
-                            duration: 0.8,
-                            delay: i * 0.1,
-                            ease: "power2.out"
-                        });
+                    });
+                    // Animate in new cards
+                    gsap.to(newCards, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.8,
+                        stagger: 0.1,
+                        ease: "power2.out",
+                        clearProps: "all"
                     });
                     
                     if (newCards.length < 8) {

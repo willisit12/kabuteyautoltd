@@ -14,7 +14,7 @@ $db = getDB();
 
 // 1. Orders (Acquisitions)
 $stmt = $db->prepare("
-    SELECT o.*, c.make, c.model, c.year, c.slug, 
+    SELECT o.*, c.make, c.model, c.year, c.slug, c.price_unit,
            (SELECT url FROM car_images WHERE car_id = c.id LIMIT 1) as primary_image
     FROM orders o
     JOIN cars c ON o.car_id = c.id
@@ -26,7 +26,7 @@ $orders = $stmt->fetchAll();
 
 // 2. Favorites (Wishlist)
 $stmt = $db->prepare("
-    SELECT f.*, c.make as make_name, c.model, c.year, c.slug, c.price,
+    SELECT f.*, c.make as make_name, c.model, c.year, c.slug, c.price, c.price_unit,
            (SELECT url FROM car_images WHERE car_id = c.id LIMIT 1) as primary_image
     FROM favorites f
     JOIN cars c ON f.car_id = c.id
@@ -128,7 +128,7 @@ ob_start();
                                 <p class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">#WAMS-ORD-<?php echo sprintf("%05d", $order['id']); ?></p>
                             </div>
                             <div class="text-center sm:text-right px-6">
-                                <p class="text-lg font-black text-foreground tabular-nums mb-1"><?php echo formatPrice($order['amount']); ?></p>
+                                <p class="text-lg font-black text-foreground tabular-nums mb-1"><?php echo formatPrice($order['amount'], $order['price_unit'] ?? null); ?></p>
                                 <p class="text-[8px] font-black text-muted-foreground uppercase"><?php echo date('M d, Y', strtotime($order['created_at'])); ?></p>
                             </div>
                             <a href="<?php echo url('customer/orders/view/' . $order['id']); ?>" class="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-white transition-all shadow-sm">
@@ -236,7 +236,7 @@ ob_start();
                             </div>
                             <div class="flex-1 overflow-hidden">
                                 <h4 class="text-sm font-black text-foreground truncate uppercase tracking-tight"><?php echo clean($fv['make_name'] . ' ' . $fv['model']); ?></h4>
-                                <p class="text-[9px] font-bold text-accent"><?php echo formatPrice($fv['price']); ?></p>
+                                <p class="text-[9px] font-bold text-accent"><?php echo formatPrice($fv['price'], $fv['price_unit'] ?? null); ?></p>
                             </div>
                             <a href="<?php echo url('car-detail/' . $fv['slug']); ?>" class="w-10 h-10 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-white transition-all shadow-sm">
                                 <i class="fas fa-chevron-right text-xs"></i>

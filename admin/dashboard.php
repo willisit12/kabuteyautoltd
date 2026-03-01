@@ -152,7 +152,7 @@ ob_start();
                                 </div>
                             </td>
                             <td class="px-6 py-5">
-                                <div class="font-bold text-foreground tabular-nums text-sm"><?php echo formatPrice($car['price']); ?></div>
+                                <div class="font-bold text-foreground tabular-nums text-sm"><?php echo formatPrice($car['price'], $car['price_unit'] ?? null); ?></div>
                                 <div class="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">MSRP Reference</div>
                             </td>
                             <td class="px-6 py-5">
