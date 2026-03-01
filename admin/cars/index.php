@@ -250,12 +250,11 @@ ob_start();
                                title="Edit Content">
                                 <i class="fas fa-pen text-xs"></i>
                             </a>
-                            <a href="delete.php?id=<?php echo $car['id']; ?>" 
-                               onclick="return confirm('Obliterate this masterpiece from existence?');" 
+                            <button onclick="confirmDelete(<?php echo $car['id']; ?>, this)" 
                                class="w-10 h-10 rounded-xl border border-border bg-background hover:bg-red-500 hover:border-red-500 hover:text-white transition-all flex items-center justify-center text-muted-foreground"
                                title="Archive Asset">
                                 <i class="fas fa-trash text-xs"></i>
-                            </a>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -345,6 +344,109 @@ ob_start();
     </div>
 </div>
 <?php endif; ?>
+
+<script>
+function confirmDelete(carId, btnElement) {
+    Swal.fire({
+        title: 'Obliterate Asset?',
+        text: "This masterpiece will be permanently removed from existence.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, obliterate it!',
+        cancelButtonText: 'Cancel',
+        background: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+        color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#020617',
+        customClass: {
+            title: 'font-black uppercase tracking-tighter',
+            popup: 'rounded-[2rem] border border-border/50 shadow-2xl',
+            confirmButton: 'rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 py-3',
+            cancelButton: 'rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 py-3'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Erasing...',
+                text: 'Scrubbing all records from the database.',
+                allowOutsideClick: false,
+                background: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+                color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#020617',
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                customClass: {
+                    title: 'font-black uppercase tracking-tighter',
+                    popup: 'rounded-[2rem] border border-border/50 shadow-2xl'
+                }
+            });
+
+            fetch('delete.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: carId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        title: 'Annihilated!',
+                        text: 'The vehicle has been successfully removed.',
+                        icon: 'success',
+                        background: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+                        color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#020617',
+                        customClass: {
+                            title: 'font-black uppercase tracking-tighter',
+                            popup: 'rounded-[2rem] border border-border/50 shadow-2xl',
+                            confirmButton: 'rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 py-3 bg-accent'
+                        }
+                    });
+                    
+                    const row = btnElement.closest('tr');
+                    gsap.to(row, {
+                        opacity: 0,
+                        x: 50,
+                        duration: 0.5,
+                        ease: "power2.in",
+                        onComplete: () => {
+                            row.remove();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message || 'Failed to delete vehicle.',
+                        icon: 'error',
+                        background: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+                        color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#020617',
+                        customClass: {
+                            title: 'font-black uppercase tracking-tighter',
+                            popup: 'rounded-[2rem] border border-border/50 shadow-2xl',
+                            confirmButton: 'rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 py-3'
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: 'System Failure',
+                    text: 'An unexpected error occurred during deletion.',
+                    icon: 'error',
+                    background: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+                    color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#020617',
+                    customClass: {
+                            title: 'font-black uppercase tracking-tighter',
+                            popup: 'rounded-[2rem] border border-border/50 shadow-2xl',
+                            confirmButton: 'rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 py-3'
+                        }
+                });
+            });
+        }
+    });
+}
+</script>
 
 <?php
 $content = ob_get_clean();

@@ -79,9 +79,14 @@ ob_start();
                                 <div class="flex-1 md:px-12">
                                     <span class="block text-[8px] font-black text-accent uppercase tracking-widest mb-2 italic">Intelligence Subject</span>
                                     <h4 class="text-xs font-black text-foreground uppercase tracking-tight leading-relaxed line-clamp-1">
-                                        <?php echo clean($inq['subject'] ?: 'Vehicle Inquiry'); ?>
                                         <?php if ($inq['make']): ?>
+                                            <?php echo clean($inq['subject'] ?: 'Vehicle Inquiry'); ?>
                                             <span class="text-muted-foreground ml-2 opacity-60">[<?php echo $inq['year'] . ' ' . $inq['make']; ?>]</span>
+                                        <?php elseif ($inq['car_id']): ?>
+                                            <?php echo clean($inq['subject'] ?: 'Vehicle Inquiry'); ?>
+                                            <span class="text-red-500 ml-2 opacity-80">[Vehicle Not Available]</span>
+                                        <?php else: ?>
+                                            <?php echo clean($inq['subject'] ?: 'General Inquiry'); ?>
                                         <?php endif; ?>
                                     </h4>
                                 </div>

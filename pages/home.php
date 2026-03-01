@@ -576,6 +576,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                     const newCards = Array.from(doc.querySelectorAll('.car-card'));
                     
                     newCards.forEach((card) => {
+                        card.style.opacity = '0'; // Hide before appending to prevent flash
                         grid.appendChild(card);
                     });
                     

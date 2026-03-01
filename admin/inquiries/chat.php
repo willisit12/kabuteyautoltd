@@ -76,8 +76,10 @@ ob_start();
             </h1>
             <p class="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-60 mt-0.5">
                 <?php echo clean($inquiry['subject'] ?: 'Vehicle Inquiry'); ?>
-                <?php if ($inquiry['car_id']): ?>
+                <?php if ($inquiry['car_id'] && $inquiry['make']): ?>
                     · <?php echo $inquiry['year'] . ' ' . $inquiry['make'] . ' ' . $inquiry['model']; ?>
+                <?php elseif ($inquiry['car_id']): ?>
+                    · <span class="text-red-500 opacity-80">[Vehicle Not Available]</span>
                 <?php endif; ?>
             </p>
         </div>
@@ -190,7 +192,7 @@ ob_start();
     <!-- Sidebar -->
     <div class="space-y-6">
         <!-- Vehicle -->
-        <?php if ($inquiry['car_id']): ?>
+        <?php if ($inquiry['car_id'] && $inquiry['make']): ?>
         <section class="glass p-6 rounded-[2rem] border border-border shadow-xl">
             <h3 class="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-5">Vehicle</h3>
             <?php if ($inquiry['car_image']): ?>
@@ -209,6 +211,11 @@ ob_start();
                     Edit
                 </a>
             </div>
+        </section>
+        <?php elseif ($inquiry['car_id']): ?>
+        <section class="glass p-6 rounded-[2rem] border border-red-500/30 bg-red-500/5 shadow-xl">
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-red-500 mb-5 text-center">Vehicle Not Available</h3>
+            <p class="text-[9px] font-bold text-muted-foreground text-center italic uppercase tracking-widest">This asset has been removed from the collection.</p>
         </section>
         <?php endif; ?>
 
@@ -375,7 +382,7 @@ ob_start();
     <div class="space-y-8">
         <section class="glass p-10 rounded-[3rem] border border-border shadow-xl">
              <h3 class="text-xs font-black uppercase tracking-widest text-muted-foreground mb-8 text-center italic opacity-60">Intelligence Target</h3>
-             <?php if ($inquiry['car_id']): ?>
+             <?php if ($inquiry['car_id'] && $inquiry['make']): ?>
                 <div class="space-y-6">
                     <div class="aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-inner">
                         <img src="<?php echo url($inquiry['car_image'] ?: 'assets/images/placeholder.jpg'); ?>" class="w-full h-full object-cover">
@@ -386,6 +393,11 @@ ob_start();
                             Inspect Asset Record <i class="fas fa-external-link-alt text-[8px]"></i>
                         </a>
                     </div>
+                </div>
+             <?php elseif ($inquiry['car_id']): ?>
+                <div class="text-center">
+                    <i class="fas fa-car-slash text-4xl text-red-500/50 mb-4"></i>
+                    <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest italic">Asset Erased / Not Available</p>
                 </div>
              <?php else: ?>
                 <p class="text-[9px] font-bold text-muted-foreground text-center italic uppercase tracking-widest">Generic Inquiry Node</p>
