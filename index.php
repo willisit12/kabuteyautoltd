@@ -109,6 +109,8 @@ $router->post('/api/favorites', __DIR__ . '/pages/api/favorites.php')->middlewar
 $router->post('/api/orders', __DIR__ . '/pages/api/orders.php')->middleware(AuthMiddleware::class);
 $router->post('/api/notifications-api.php', __DIR__ . '/pages/api/notifications-api.php')->middleware(AuthMiddleware::class);
 $router->post('/api/chat-message', __DIR__ . '/pages/api/chat-message.php')->middleware(AuthMiddleware::class);
+$router->post('/api/bulk-upload', __DIR__ . '/pages/api/bulk-upload.php');
+
 
 // Dispatch
 $router->dispatch();
