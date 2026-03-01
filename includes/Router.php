@@ -98,7 +98,7 @@ class Router
             }
         }
 
-        $this->handleNotFound();
+        $this->handleNotFound($path);
     }
 
     /**
@@ -160,13 +160,31 @@ class Router
             extract($vars, EXTR_SKIP);
             require_once $handler;
         } else {
-            $this->handleNotFound();
+            // Get current path for context
+            $path = '/' . ltrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/');
+            if ($this->basePath !== '' && strpos($path, $this->basePath) === 0) {
+                $path = substr($path, strlen($this->basePath));
+            }
+            $path = '/' . ltrim($path, '/');
+            $this->handleNotFound($path);
         }
     }
 
-    private function handleNotFound(): void
+    private function handleNotFound(string $path = ''): void
     {
         http_response_code(404);
+
+        // If it's an API route, return JSON
+        if (str_starts_with($path, '/api/')) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'error' => 'API route not found',
+                'path' => $path
+            ]);
+            exit;
+        }
+
         $notFoundFile = dirname(__DIR__) . '/pages/404.php';
         if (file_exists($notFoundFile)) {
             require_once $notFoundFile;
