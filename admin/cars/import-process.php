@@ -14,8 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect('import.php');
 }
 
+// ─── Initial Security & Server Limit Checks ───────────────────────────────────
+
+// If $_POST is empty but request is large, the server likely dropped the data due to post_max_size
+if (isPostSizeExceeded()) {
+    setFlash('error', 'The uploaded file is too large for the server to process. Please increase your PHP `post_max_size` and `upload_max_filesize`.');
+    redirect('import.php');
+}
+
 if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
-    setFlash('error', 'Security integrity compromised.');
+    setFlash('error', 'Security integrity compromised. The session might have expired or the file was too large.');
     redirect('import.php');
 }
 

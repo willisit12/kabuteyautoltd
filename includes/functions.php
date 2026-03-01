@@ -26,6 +26,19 @@ function validateCSRFToken($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
+/**
+ * Checks if the request exceeded the PHP post_max_size limit.
+ * If exceeded, $_POST and $_FILES will be empty even if data was sent.
+ */
+function isPostSizeExceeded() {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST) && $_SERVER['CONTENT_LENGTH'] > 0) {
+        $postMaxSize = ini_get('post_max_size');
+        // Simple conversion if needed, but the fact it's empty with content-length > 0 is usually enough
+        return true;
+    }
+    return false;
+}
+
 // Input Sanitization
 function clean($input) {
     if (is_array($input)) {

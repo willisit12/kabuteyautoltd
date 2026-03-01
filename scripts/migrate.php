@@ -10,7 +10,10 @@ require_once __DIR__ . '/../includes/functions.php';
 // Security check for web-based execution
 if (php_sapi_name() !== 'cli') {
     $secret = $_GET['key'] ?? '';
-    if ($secret !== 'elite_migration_2026') { // Simple secret for protection
+    // Load from environment variable (set in .env)
+    $validSecret = $_ENV['MIGRATION_SECRET'] ?? 'default_secure_key_123';
+    
+    if ($secret !== $validSecret) {
         die('Unauthorized access.');
     }
 }
