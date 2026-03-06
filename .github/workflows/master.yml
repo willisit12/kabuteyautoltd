@@ -1,0 +1,19 @@
+on: push
+
+jobs:
+  deploy:
+    name: Checkout and Upload
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload Files
+        uses: pontago/lftp-deploy-action@master
+        with:
+          protocol: sftp
+          host: example.com
+          username: username
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          local_dir: ./local/
+          remote_dir: /home/user1/remote/
