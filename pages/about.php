@@ -22,8 +22,8 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 Established 2018
             </span>
             <h1 class="text-5xl md:text-9xl font-black text-foreground mb-6 tracking-tighter uppercase leading-[0.9]">
-                The Poper <br> 
-                <span class="text-gradient">Heritage.</span>
+                The Thorin <br> 
+                <span class="text-gradient">Legacy.</span>
             </h1>
             <p class="text-muted-foreground text-lg md:text-2xl max-w-3xl mx-auto leading-relaxed italic border-x-2 border-accent/20 px-8 py-2">
                 Merging the precision of engineering with the soul of a private collection. We don't just sell vehicles; we guardian the cinematic experience of driving.
@@ -34,16 +34,16 @@ include_once __DIR__ . '/../includes/layout/header.php';
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center mb-32 reveal-section">
             <div class="relative group">
                 <div class="absolute inset-0 bg-accent/20 rounded-[3rem] blur-2xl group-hover:bg-accent/30 transition-all duration-700 -z-10"></div>
-                <img src="https://images.unsplash.com/photo-1562141989-c5c79ac8f576?auto=format&fit=crop&q=80&w=1200" 
+                <img src="<?php echo url('assets/images/site-images/about-car-image.jpg'); ?>" 
                      alt="Our Showroom" 
                      class="rounded-[3rem] shadow-2xl border border-border/50 transition-transform duration-1000 group-hover:scale-[1.02]">
             </div>
             <div class="space-y-8">
                 <h2 class="text-3xl md:text-5xl font-black text-foreground tracking-tighter uppercase">Our <span class="text-accent underline decoration-accent/20 underline-offset-8">Philosophy</span></h2>
                 <div class="prose prose-accent dark:prose-invert max-w-none text-muted-foreground text-lg leading-relaxed font-medium">
-                    <p>Poper Auto Export was born in the strategic port hub of Guangzhou with a singular vision: to bridge the gap between China's surplus of high-quality vehicles and the global demand for reliable transportation. Our founder, James Poper, recognized that the world deserved access to the same technological precision found in China's automotive market.</p>
-                    <p>Every vehicle we export undergoes a rigorous "Export-Ready" certification. We manage the entire lifecycle—from sourcing and multi-point inspection to customs clearance and international freight—ensuring that your next vehicle is ready for the roads of the world.</p>
-                    <p class="italic text-foreground font-bold">"We don't just export cars; we deliver the freedom of mobility to every corner of the globe."</p>
+                    <p>Poper Auto Export was forged under the uncompromising vision of Zenos Thorin. In the industrial heart of Guangzhou, Thorin saw more than just manufacture; he saw a global mission to redefine the standards of used vehicle exportation.</p>
+                    <p>Under his leadership, we have moved beyond simple trade. Every vehicle is a testament to the Thorin standard—a rigorous synthesis of engineering excellence and logistical mastery. We don't just bridge markets; we anchor the trust of international buyers in the superior quality of the Chinese automotive landscape.</p>
+                    <p class="italic text-foreground font-bold">"Excellence is not an act, but the standard by which we measure our legacy."</p>
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 <!-- CEO/Founder -->
                 <div class="group/team flex flex-col">
                     <div class="relative rounded-[2.5rem] overflow-hidden mb-8 aspect-[4/5] border border-border/50 shadow-xl">
-                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover grayscale group-hover/team:grayscale-0 transition-all duration-700 scale-105 group-hover/team:scale-100">
+                        <img src="<?php echo url('assets/images/staffs/01.jpg.jpeg'); ?>" class="w-full h-full object-cover grayscale group-hover/team:grayscale-0 transition-all duration-700 scale-105 group-hover/team:scale-100">
                         <div class="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover/team:opacity-100 transition-opacity duration-500"></div>
                         <div class="absolute bottom-6 left-6 opacity-0 group-hover/team:opacity-100 transition-all duration-500 translate-y-4 group-hover/team:translate-y-0">
                             <div class="flex gap-4 text-foreground">
@@ -71,7 +71,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                             </div>
                         </div>
                     </div>
-                    <h4 class="text-2xl font-black text-foreground tracking-tight mb-2">James Poper</h4>
+                    <h4 class="text-2xl font-black text-foreground tracking-tight mb-2">Zenos Thorin</h4>
                     <p class="text-accent font-black uppercase tracking-widest text-xs">Founder & CEO</p>
                 </div>
 
