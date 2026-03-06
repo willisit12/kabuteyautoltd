@@ -502,7 +502,7 @@
                 </div>
                 <div>
                     <h1 class="font-black tracking-tighter uppercase text-lg leading-none"><?php echo SITE_NAME; ?></h1>
-                    <p class="text-[8px] font-black uppercase tracking-[0.3em] text-accent mt-1">Toronto Elite</p>
+                    <p class="text-[8px] font-black uppercase tracking-[0.3em] text-accent mt-1">Global Export</p>
                 </div>
             </div>
             <button @click="optimizedToggleMobileMenu(); mobileMenu = false" class="text-white/40 hover:text-white transition-colors">

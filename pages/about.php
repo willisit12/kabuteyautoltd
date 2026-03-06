@@ -19,10 +19,10 @@ include_once __DIR__ . '/../includes/layout/header.php';
         <!-- Hero Narrative -->
         <div class="text-center mb-24 reveal-section">
             <span class="inline-block text-accent font-black tracking-[0.3em] uppercase text-[10px] mb-4">
-                Established 2012
+                Established 2018
             </span>
             <h1 class="text-5xl md:text-9xl font-black text-foreground mb-6 tracking-tighter uppercase leading-[0.9]">
-                The Williams <br> 
+                The Poper <br> 
                 <span class="text-gradient">Heritage.</span>
             </h1>
             <p class="text-muted-foreground text-lg md:text-2xl max-w-3xl mx-auto leading-relaxed italic border-x-2 border-accent/20 px-8 py-2">
@@ -41,9 +41,9 @@ include_once __DIR__ . '/../includes/layout/header.php';
             <div class="space-y-8">
                 <h2 class="text-3xl md:text-5xl font-black text-foreground tracking-tighter uppercase">Our <span class="text-accent underline decoration-accent/20 underline-offset-8">Philosophy</span></h2>
                 <div class="prose prose-accent dark:prose-invert max-w-none text-muted-foreground text-lg leading-relaxed font-medium">
-                    <p>Williams Auto was born in the heart of Toronto from a singular vision: to redefine the pre-owned luxury market. Our founder, Marcus Williams, believed that acquiring a masterpiece of engineering should be as memorable as the first time you turn the ignition.</p>
-                    <p>Every vehicle in our collection undergoes a rigorous "Cinematic Standard" inspection. We look beyond the mechanical, analyzing the aesthetic soul and the heritage of ownership to ensure that every car we deliver is a legacy in motion.</p>
-                    <p class="italic text-foreground font-bold">"We are not in the business of machines. We are in the business of the exhilaration they inspire."</p>
+                    <p>Poper Auto Export was born in the strategic port hub of Guangzhou with a singular vision: to bridge the gap between China's surplus of high-quality vehicles and the global demand for reliable transportation. Our founder, James Poper, recognized that the world deserved access to the same technological precision found in China's automotive market.</p>
+                    <p>Every vehicle we export undergoes a rigorous "Export-Ready" certification. We manage the entire lifecycle—from sourcing and multi-point inspection to customs clearance and international freight—ensuring that your next vehicle is ready for the roads of the world.</p>
+                    <p class="italic text-foreground font-bold">"We don't just export cars; we deliver the freedom of mobility to every corner of the globe."</p>
                 </div>
             </div>
         </div>
@@ -71,8 +71,8 @@ include_once __DIR__ . '/../includes/layout/header.php';
                             </div>
                         </div>
                     </div>
-                    <h4 class="text-2xl font-black text-foreground tracking-tight mb-2">Marcus Williams</h4>
-                    <p class="text-accent font-black uppercase tracking-widest text-xs">Founder & Chief Curator</p>
+                    <h4 class="text-2xl font-black text-foreground tracking-tight mb-2">James Poper</h4>
+                    <p class="text-accent font-black uppercase tracking-widest text-xs">Founder & CEO</p>
                 </div>
 
                 <!-- Sales Director -->
@@ -87,8 +87,8 @@ include_once __DIR__ . '/../includes/layout/header.php';
                             </div>
                         </div>
                     </div>
-                    <h4 class="text-2xl font-black text-foreground tracking-tight mb-2">Elena Rossi</h4>
-                    <p class="text-accent font-black uppercase tracking-widest text-xs">Director of Acquisitions</p>
+                    <h4 class="text-2xl font-black text-foreground tracking-tight mb-2">Li Wei</h4>
+                    <p class="text-accent font-black uppercase tracking-widest text-xs">Director of Global Logistics</p>
                 </div>
 
                 <!-- Master Tech -->
@@ -102,8 +102,8 @@ include_once __DIR__ . '/../includes/layout/header.php';
                             </div>
                         </div>
                     </div>
-                    <h4 class="text-2xl font-black text-foreground tracking-tight mb-2">Jameson Blake</h4>
-                    <p class="text-accent font-black uppercase tracking-widest text-xs">Master Performance Technician</p>
+                    <h4 class="text-2xl font-black text-foreground tracking-tight mb-2">Chen Ming</h4>
+                    <p class="text-accent font-black uppercase tracking-widest text-xs">Lead Certification Specialist</p>
                 </div>
             </div>
         </div>
@@ -123,8 +123,8 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 <div class="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px]">Years of Excellence</div>
             </div>
             <div class="glass p-10 rounded-[2.5rem] border border-border/50 text-center hover:scale-105 transition-all duration-500 group">
-                <div class="text-5xl font-black text-foreground mb-3 tracking-tighter group-hover:text-accent transition-colors">GTA</div>
-                <div class="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px]">Premier Concierge</div>
+                <div class="text-5xl font-black text-foreground mb-3 tracking-tighter group-hover:text-accent transition-colors">4</div>
+                <div class="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px]">Continents Served</div>
             </div>
         </div>
     </div>

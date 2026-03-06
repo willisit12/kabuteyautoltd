@@ -106,6 +106,18 @@ class I18n {
         return $base * self::$rates[self::$currentCurrency];
     }
 
+    /**
+     * Converts an amount from one currency to another directly
+     * without affecting the current session currency.
+     */
+    public static function convertBetween($amount, $from, $to) {
+        if (!isset(self::$rates[$from]) || !isset(self::$rates[$to])) return $amount;
+        // Convert to USD base first
+        $base = $amount / self::$rates[$from];
+        // Convert to target
+        return $base * self::$rates[$to];
+    }
+
     public static function getCurrency() {
         return self::$currentCurrency;
     }

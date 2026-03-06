@@ -51,31 +51,44 @@ function validateEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
-// Format price with dynamic currency conversion and localized symbols
-function formatPrice($price, $priceUnit = null) {
+/**
+ * Retrieves the global markup value in CNY from the database
+ */
+function getGlobalMarkup() {
+    static $markup = null;
+    if ($markup !== null) return $markup;
+    
+    try {
+        $db = getDB();
+        $stmt = $db->prepare("SELECT `value` FROM global_settings WHERE `key` = 'markup_cny'");
+        $stmt->execute();
+        $markup = (float)($stmt->fetchColumn() ?: 0);
+    } catch (Exception $e) {
+        $markup = 0;
+    }
+    return $markup;
+}
+
+// Format price with dynamic currency conversion, localized symbols, and global markup
+function formatPrice($price, $priceUnit = 'USD', $addMarkup = true) {
     if (!$price) return __('Contact for Price');
 
-    // If a per-car price_unit is provided, use it directly (no conversion)
-    if ($priceUnit) {
-        $currencyCode = strtoupper(trim($priceUnit));
-        $symbols = [
-            'USD' => '$',
-            'EUR' => '€',
-            'GBP' => '£',
-            'AED' => 'AED ',
-            'CNY' => '¥',
-            'JPY' => '¥',
-        ];
-        if (!class_exists('NumberFormatter')) {
-            $symbol = $symbols[$currencyCode] ?? $currencyCode . ' ';
-            return $symbol . number_format($price, 0);
+    // Use priceUnit as source currency (defaulting to USD if empty)
+    $fromCurrency = !empty($priceUnit) ? strtoupper(trim($priceUnit)) : 'USD';
+    
+    // Add global markup if requested
+    $totalPrice = (float)$price;
+    if ($addMarkup) {
+        $markupCny = getGlobalMarkup();
+        if ($markupCny > 0) {
+            // Convert markup from CNY to the car's price unit
+            $markupInCarUnit = I18n::convertBetween($markupCny, 'CNY', $fromCurrency);
+            $totalPrice += $markupInCarUnit;
         }
-        $formatter = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
-        return $formatter->formatCurrency($price, $currencyCode);
     }
 
-    // Fall back to global I18n currency
-    $convertedPrice = I18n::convert($price);
+    // Convert to global I18n currency
+    $convertedPrice = I18n::convert($totalPrice, $fromCurrency);
     $currencyCode = I18n::getCurrency();
     $locale = I18n::getLocale();
     $intlLocale = ($locale === 'es') ? 'es_ES' : 'en_US';
@@ -88,12 +101,15 @@ function formatPrice($price, $priceUnit = null) {
             'AED' => 'AED ',
             'CNY' => '¥',
             'JPY' => '¥',
+            'GHS' => 'GH₵'
         ];
         $symbol = $symbols[$currencyCode] ?? $currencyCode . ' ';
         return $symbol . number_format($convertedPrice, 0);
     }
 
     $formatter = new NumberFormatter($intlLocale, NumberFormatter::CURRENCY);
+    // Remove decimal points for a cleaner "Elite" aesthetic
+    $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
     return $formatter->formatCurrency($convertedPrice, $currencyCode);
 }
 

@@ -4,7 +4,7 @@
  * Modern Homepage Template
  */
 
-$pageTitle = 'The Williams Standard';
+$pageTitle = 'The Poper Standard';
 $featuredCars = getFeaturedCars(10);
 
 // If we have few featured cars, double the array so the swiper loop looks seamless
@@ -13,7 +13,7 @@ if (count($featuredCars) > 0 && count($featuredCars) < 6) {
 }
 
 // Initial cars for the grid
-$initialLimit = 8;
+$initialLimit = 24;
 $latestCars = searchCars([], $initialLimit);
 $favoriteIds = isLoggedIn() ? getUserFavoriteIds($_SESSION['user_id'] ?? null) : [];
 
@@ -61,7 +61,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
     <div class="relative z-20 max-w-6xl mx-auto px-4 text-center">
         <div class="hero-text-reveal overflow-hidden mb-4">
             <span class="inline-block text-accent font-bold tracking-[0.3em] uppercase text-sm animate-pulse-slow">
-                EST. 2012 • TORONTO, CANADA
+                EST. 2018 • GUANGZHOU, CHINA
             </span>
         </div>
         
@@ -71,7 +71,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
         </h1>
         
         <p class="text-lg md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-12 leading-relaxed opacity-0" id="hero-desc">
-            Experience the GTA's most curated collection of premium pre-owned vehicles. Cinematic service, unbeatable heritage.
+            Experience China's most trusted export platform for premium used vehicles. Global logistics, cinematic quality, and absolute transparency.
         </p>
         
         <div class="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center opacity-0" id="hero-btns">
@@ -102,7 +102,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
             <div class="car-metric-card p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] bg-card border border-border hover:bg-card/80 transition-all duration-500">
                 <div class="text-4xl md:text-5xl font-black text-foreground mb-2">150+</div>
                 <div class="text-accent text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-4">Inspection Points</div>
-                <p class="text-muted-foreground leading-relaxed text-sm">Every Williams vehicle undergoes a rigorous mechanical and aesthetic audit before joining our collection.</p>
+                <p class="text-muted-foreground leading-relaxed text-sm">Every Poper vehicle undergoes a rigorous 150+ point export inspection before global shipping.</p>
             </div>
             <div class="car-metric-card p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] bg-card border border-border hover:bg-card/80 transition-all duration-500">
                 <div class="text-4xl md:text-5xl font-black text-foreground mb-2">98%</div>
@@ -110,9 +110,9 @@ include_once __DIR__ . '/../includes/layout/header.php';
                 <p class="text-muted-foreground leading-relaxed text-sm">Our client retention rate reflects our commitment to cinematic transparency and post-sale care.</p>
             </div>
             <div class="car-metric-card p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] bg-card border border-border hover:bg-card/80 transition-all duration-500">
-                <div class="text-4xl md:text-5xl font-black text-foreground mb-2">GTA</div>
-                <div class="text-accent text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-4">Doorstep Delivery</div>
-                <p class="text-muted-foreground leading-relaxed text-sm">Experience the thrill of your new car delivered right to your home, anywhere in the Greater Toronto Area.</p>
+                <div class="text-4xl md:text-5xl font-black text-foreground mb-2">Global</div>
+                <div class="text-accent text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-4">Sea & Air Freight</div>
+                <p class="text-muted-foreground leading-relaxed text-sm">We manage end-to-end logistics to deliver your vehicle to major ports across Africa, Asia, Europe, and the US.</p>
             </div>
         </div>
     </div>
@@ -385,7 +385,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
             <a href="<?php echo url('contact'); ?>" class="btn-premium bg-accent text-white px-12 py-6 rounded-3xl font-bold text-xl shadow-2xl">
                 Contact Our Concierge
             </a>
-            <a href="tel:+233202493547" class="px-12 py-6 rounded-3xl border border-border text-foreground font-bold text-xl hover:bg-muted transition-colors shadow-sm">
+            <a href="tel:+862088886688" class="px-12 py-6 rounded-3xl border border-border text-foreground font-bold text-xl hover:bg-muted transition-colors shadow-sm">
                 Call Now
             </a>
         </div>
