@@ -52,30 +52,14 @@ function validateEmail($email) {
 }
 
 // Format price with dynamic currency conversion and localized symbols
-function formatPrice($price, $priceUnit = null) {
+function formatPrice($price, $priceUnit = 'USD') {
     if (!$price) return __('Contact for Price');
 
-    // If a per-car price_unit is provided, use it directly (no conversion)
-    if ($priceUnit) {
-        $currencyCode = strtoupper(trim($priceUnit));
-        $symbols = [
-            'USD' => '$',
-            'EUR' => '€',
-            'GBP' => '£',
-            'AED' => 'AED ',
-            'CNY' => '¥',
-            'JPY' => '¥',
-        ];
-        if (!class_exists('NumberFormatter')) {
-            $symbol = $symbols[$currencyCode] ?? $currencyCode . ' ';
-            return $symbol . number_format($price, 0);
-        }
-        $formatter = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
-        return $formatter->formatCurrency($price, $currencyCode);
-    }
-
-    // Fall back to global I18n currency
-    $convertedPrice = I18n::convert($price);
+    // Use priceUnit as source currency (defaulting to USD if empty)
+    $fromCurrency = !empty($priceUnit) ? strtoupper(trim($priceUnit)) : 'USD';
+    
+    // Convert to global I18n currency
+    $convertedPrice = I18n::convert($price, $fromCurrency);
     $currencyCode = I18n::getCurrency();
     $locale = I18n::getLocale();
     $intlLocale = ($locale === 'es') ? 'es_ES' : 'en_US';
@@ -88,12 +72,15 @@ function formatPrice($price, $priceUnit = null) {
             'AED' => 'AED ',
             'CNY' => '¥',
             'JPY' => '¥',
+            'GHS' => 'GH₵'
         ];
         $symbol = $symbols[$currencyCode] ?? $currencyCode . ' ';
         return $symbol . number_format($convertedPrice, 0);
     }
 
     $formatter = new NumberFormatter($intlLocale, NumberFormatter::CURRENCY);
+    // Remove decimal points for a cleaner "Elite" aesthetic
+    $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
     return $formatter->formatCurrency($convertedPrice, $currencyCode);
 }
 
