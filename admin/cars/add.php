@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'features' => json_encode(array_filter(array_map('trim', explode(',', $_POST['features'] ?? '')))),
         'featured' => isset($_POST['featured']) ? 1 : 0,
         'walkaround_video_url' => clean($_POST['walkaround_video_url'] ?? '') ?: null,
-        'location' => clean($_POST['location'] ?? 'Toronto, ON'),
+        'location' => clean($_POST['location'] ?? 'Guangzhou, China'),
         'status' => 'AVAILABLE',
         'view_count' => 0,
         'created_at' => date('Y-m-d H:i:s')
@@ -258,7 +258,7 @@ ob_start();
                     </div>
                     <div class="space-y-3">
                         <label class="block text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Asset Location</label>
-                        <input type="text" name="location" value="Toronto, ON" placeholder="e.g. Toronto, ON"
+                        <input type="text" name="location" value="Guangzhou, China" placeholder="e.g. Guangzhou, China"
                                class="w-full bg-background/50 border border-border text-foreground px-6 py-4 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold outline-none">
                     </div>
                     <div class="space-y-3">

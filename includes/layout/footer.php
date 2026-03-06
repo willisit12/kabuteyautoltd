@@ -9,7 +9,7 @@
                         <?php renderLogo('h-12'); ?>
                     </div>
                     <p class="text-muted-foreground leading-relaxed font-medium max-w-xs transition-colors">
-                        <?php echo SITE_TAGLINE; ?>. <br>Toronto's heritage for automotive excellence since 2012.
+                        <?php echo SITE_TAGLINE; ?>. <br>China's trusted source for quality used car exports since 2018.
                     </p>
                 </div>
                
@@ -30,13 +30,13 @@
                             <span class="w-10 h-10 rounded-full bg-muted flex items-center justify-center group-hover:bg-accent/20 group-hover:text-accent transition-all">
                                 <i class="fas fa-phone-alt text-sm"></i>
                             </span>
-                            <span class="font-medium">+233202493547</span>
+                            <span class="font-medium">+86 20 8888 6688</span>
                         </li>
                         <li class="flex items-center gap-4 group">
                             <span class="w-10 h-10 rounded-full bg-muted flex items-center justify-center group-hover:bg-accent/20 group-hover:text-accent transition-all">
                                 <i class="fas fa-envelope text-sm"></i>
                             </span>
-                            <span class="font-medium">concierge@williamsauto.com</span>
+                            <span class="font-medium">exports@poperautoexport.com</span>
                         </li>
                     </ul>
                 </div>

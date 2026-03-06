@@ -71,7 +71,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                         </div>
                         <div>
                             <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Direct Line</h4>
-                            <p class="text-xl font-black text-foreground">+233202493547</p>
+                            <p class="text-xl font-black text-foreground">+86 20 8888 6688</p>
                         </div>
                     </div>
 
@@ -82,7 +82,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                         </div>
                         <div>
                             <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Electronic Correspondence</h4>
-                            <p class="text-xl font-black text-foreground">hello@williamsauto.com</p>
+                            <p class="text-xl font-black text-foreground">hello@poperautoexport.com</p>
                         </div>
                     </div>
 
@@ -93,7 +93,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                         </div>
                         <div>
                             <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">The Showroom</h4>
-                            <p class="text-xl font-black text-foreground">Toronto, ON, Canada</p>
+                            <p class="text-xl font-black text-foreground">Guangzhou, Guangdong, China</p>
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@ include_once __DIR__ . '/../includes/layout/header.php';
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div class="space-y-3">
                                 <label class="block text-[10px] font-black uppercase tracking-widest text-foreground/60 ml-1">Full Name</label>
-                                <input type="text" name="name" required placeholder="Marcus Williams"
+                                <input type="text" name="name" required placeholder="James Poper"
                                        class="w-full bg-background border border-border text-foreground px-6 py-5 rounded-2xl focus:ring-2 focus:ring-accent focus:border-accent transition font-bold placeholder:text-muted-foreground/30 shadow-sm">
                             </div>
                             <div class="space-y-3">
