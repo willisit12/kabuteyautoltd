@@ -51,15 +51,44 @@ function validateEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
-// Format price with dynamic currency conversion and localized symbols
-function formatPrice($price, $priceUnit = 'USD') {
+/**
+ * Retrieves the global markup value in CNY from the database
+ */
+function getGlobalMarkup() {
+    static $markup = null;
+    if ($markup !== null) return $markup;
+    
+    try {
+        $db = getDB();
+        $stmt = $db->prepare("SELECT `value` FROM global_settings WHERE `key` = 'markup_cny'");
+        $stmt->execute();
+        $markup = (float)($stmt->fetchColumn() ?: 0);
+    } catch (Exception $e) {
+        $markup = 0;
+    }
+    return $markup;
+}
+
+// Format price with dynamic currency conversion, localized symbols, and global markup
+function formatPrice($price, $priceUnit = 'USD', $addMarkup = true) {
     if (!$price) return __('Contact for Price');
 
     // Use priceUnit as source currency (defaulting to USD if empty)
     $fromCurrency = !empty($priceUnit) ? strtoupper(trim($priceUnit)) : 'USD';
     
+    // Add global markup if requested
+    $totalPrice = (float)$price;
+    if ($addMarkup) {
+        $markupCny = getGlobalMarkup();
+        if ($markupCny > 0) {
+            // Convert markup from CNY to the car's price unit
+            $markupInCarUnit = I18n::convertBetween($markupCny, 'CNY', $fromCurrency);
+            $totalPrice += $markupInCarUnit;
+        }
+    }
+
     // Convert to global I18n currency
-    $convertedPrice = I18n::convert($price, $fromCurrency);
+    $convertedPrice = I18n::convert($totalPrice, $fromCurrency);
     $currencyCode = I18n::getCurrency();
     $locale = I18n::getLocale();
     $intlLocale = ($locale === 'es') ? 'es_ES' : 'en_US';

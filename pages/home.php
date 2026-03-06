@@ -13,7 +13,7 @@ if (count($featuredCars) > 0 && count($featuredCars) < 6) {
 }
 
 // Initial cars for the grid
-$initialLimit = 8;
+$initialLimit = 24;
 $latestCars = searchCars([], $initialLimit);
 $favoriteIds = isLoggedIn() ? getUserFavoriteIds($_SESSION['user_id'] ?? null) : [];
 

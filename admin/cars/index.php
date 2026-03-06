@@ -182,7 +182,10 @@ ob_start();
                         <?php echo sortLink('make', 'Vehicle Asset', $sort, $order); ?>
                     </th>
                     <th class="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                        <?php echo sortLink('price', 'Valuation', $sort, $order); ?>
+                        <?php echo sortLink('price', 'Base Price', $sort, $order); ?>
+                    </th>
+                    <th class="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                        Global Markup (CNY)
                     </th>
                     <th class="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                         <?php echo sortLink('status', 'Status', $sort, $order); ?>
@@ -214,8 +217,12 @@ ob_start();
                         </div>
                     </td>
                     <td class="px-8 py-6">
-                        <div class="font-black text-foreground tabular-nums text-base"><?php echo formatPrice($car['price'], $car['price_unit'] ?? null); ?></div>
+                        <div class="font-black text-foreground tabular-nums text-base"><?php echo formatPrice($car['price'], $car['price_unit'] ?? null, false); ?></div>
                         <div class="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1"><?php echo formatMileage($car['mileage']); ?></div>
+                    </td>
+                    <td class="px-8 py-6">
+                        <div class="font-black text-accent tabular-nums text-base">+<?php echo number_format(getGlobalMarkup()); ?> ¥</div>
+                        <div class="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Global Adjustment</div>
                     </td>
                     <td class="px-8 py-6">
                         <?php
