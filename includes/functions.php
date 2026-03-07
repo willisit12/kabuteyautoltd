@@ -27,13 +27,45 @@ function validateCSRFToken($token) {
 }
 
 /**
- * Checks if the request exceeded the PHP post_max_size limit.
- * If exceeded, $_POST and $_FILES will be empty even if data was sent.
+ * Converts a shorthand byte value from php.ini to bytes.
+ *
+ * @param string $val The shorthand byte value (e.g., "2M", "2048K", "1G").
+ * @return int The value in bytes.
  */
-function isPostSizeExceeded() {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST) && $_SERVER['CONTENT_LENGTH'] > 0) {
-        $postMaxSize = ini_get('post_max_size');
-        // Simple conversion if needed, but the fact it's empty with content-length > 0 is usually enough
+function convertShorthandToBytes(string $val): int {
+    $val = trim($val);
+    $last = strtolower($val[strlen($val)-1]);
+    $val = (int)$val;
+    switch ($last) {
+        case 'g':
+            $val *= 1024;
+        case 'm':
+            $val *= 1024;
+        case 'k':
+            $val *= 1024;
+    }
+    return $val;
+}
+
+/**
+ * Get the PHP post_max_size in bytes.
+ * @return int
+ */
+function getPostMaxSize(): int {
+    return convertShorthandToBytes(ini_get('post_max_size'));
+}
+
+/**
+ * Check if the POST size exceeds server limits
+ */
+function isPostSizeExceeded(): bool {
+    $maxSize = getPostMaxSize();
+    $contentLength = isset($_SERVER['CONTENT_LENGTH']) ? (int)$_SERVER['CONTENT_LENGTH'] : 0;
+    
+    // Log for debugging
+    file_put_contents('size_debug.log', "Content-Length: $contentLength, Max-Size: $maxSize\n", FILE_APPEND);
+    
+    if ($contentLength > $maxSize) {
         return true;
     }
     return false;
